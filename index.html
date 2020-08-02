@@ -79,8 +79,15 @@ Untitled
 		let note_dir_ls = [];
 		let note_file_ls = [];
 		
+		const queryString = window.location.search;
+		console.log(queryString);
+		const urlParams = new URLSearchParams(queryString);
+		// const product = urlParams.get('product');
 		
-		window.location.href = AUTH_URL;
+		if(queryString == "")
+		{
+			window.location.href = AUTH_URL;
+		}
 		
 		// chrome.storage.sync.get('dbox_key_populated', function(data) {
 		//   // changeColor.style.backgroundColor = data.color;
@@ -408,10 +415,6 @@ Untitled
             alert( ta.value );
         }
 		
-		const queryString = window.location.search;
-		console.log(queryString);
-		const urlParams = new URLSearchParams(queryString);
-		// const product = urlParams.get('product');
 
     var ta = TextAreaLineNumbersWithCanvas();
     //ta.value = "HELLO";//TextAreaLineNumbersWithCanvas.toString();
