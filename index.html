@@ -57,13 +57,14 @@ Untitled
 
 
     <script>
+		
 		let page_url = "";
 		let page_name = "";
 
 		let dbox_key_value = '4neAoDtRLnAAAAAAAAAsiehPj-8NUSr-oypvdRR-wnI';		
 		let CLIENT_ID = 'p4p60gowtlk2vl9';
 		// var CALLBACK_URL = 'https://'+chrome.runtime.id+'.chromiumapp.org';
-		let AUTH_URL = 'https://www.dropbox.com/oauth2/authorize?client_id=' + CLIENT_ID + '&response_type=token' + '&redirect_uri=' + document.URL;
+		let AUTH_URL = 'https://www.dropbox.com/oauth2/authorize?client_id=' + CLIENT_ID + '&response_type=token' + '&redirect_uri=' + 'https://jacobwtorres.github.io/';
 		
 		let BMARK_PATH = "/Bookmarks/";
 		let NOTE_PATH = "/Notes/";
@@ -406,6 +407,11 @@ Untitled
 			note_save_handler();
             alert( ta.value );
         }
+		
+		const queryString = window.location.search;
+		console.log(queryString);
+		const urlParams = new URLSearchParams(queryString);
+		// const product = urlParams.get('product');
 
     var ta = TextAreaLineNumbersWithCanvas();
     //ta.value = "HELLO";//TextAreaLineNumbersWithCanvas.toString();
