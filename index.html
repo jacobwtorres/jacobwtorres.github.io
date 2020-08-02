@@ -1,0 +1,428 @@
+<!DOCTYPE HTML>
+<html>
+
+<!-- <link rel="stylesheet" type="text/css" href="style.css"> -->
+
+<style>
+    html, body {
+        height: 100%;
+    }
+
+    iframe {
+        display: block;
+        background: #FFF;
+        border: none;
+        width: 100%;
+        height: 100%;
+    }
+
+    input:focus, textarea:focus, select:focus{
+        outline: none;
+    }
+
+        /* chrome scrollbars */
+    textarea::-webkit-scrollbar
+    {
+        width: 16px;
+        background-color: #444;
+        cursor: pointer;
+    }
+    textarea::-webkit-scrollbar-track
+    {
+        background-color: #333;
+        cursor: pointer;
+    }
+    textarea::-webkit-scrollbar-corner
+    {
+      background-color: #484;
+      -webkit-box-shadow: inset 0 0 6px rgba(255,255,255,0.3);
+    }
+    textarea::-webkit-scrollbar-thumb
+    {
+      background-color: #444;
+      /*outline: 1px solid #666;*/
+      -webkit-box-shadow: inset 0 0 6px rgba(255,255,255,0.3);
+      cursor: pointer;
+    }
+</style>
+
+<header contenteditable="true" rows=3>
+Untitled
+</header>
+
+<body style="overflow:hidden;" bgcolor="#333">
+    <script>
+
+    </script>
+
+
+    <script>
+		let page_url = "";
+		let page_name = "";
+
+		let dbox_key_value = '4neAoDtRLnAAAAAAAAAsiehPj-8NUSr-oypvdRR-wnI';		
+		let CLIENT_ID = 'p4p60gowtlk2vl9';
+		// var CALLBACK_URL = 'https://'+chrome.runtime.id+'.chromiumapp.org';
+		let AUTH_URL = 'https://www.dropbox.com/oauth2/authorize?client_id=' + CLIENT_ID + '&response_type=token' + '&redirect_uri=' + document.URL;
+		
+		let BMARK_PATH = "/Bookmarks/";
+		let NOTE_PATH = "/Notes/";
+		
+		let current_note_path = "";
+		let already_saved = 0;
+		let full_path_to_write = "";
+		let lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+		let cached_note = 0; //cached note is loaded only if the exact version was never properly loaded to dropbox
+		
+		let bmark_dir_ls = [];
+		let note_dir_ls = [];
+		let note_file_ls = [];
+		
+		
+		// window.location.href = AUTH_URL;
+		
+		// chrome.storage.sync.get('dbox_key_populated', function(data) {
+		//   // changeColor.style.backgroundColor = data.color;
+		//   // changeColor.setAttribute('value', data.color);
+		//
+		//   if( data.dbox_key_populated == "TRUE")
+		//   {
+		//   	chrome.storage.sync.get('dbox_key_value', function(data) {
+		// 		dbox_key_value = data.dbox_key_value;
+		// 		popup_init();
+		//   	});
+		//   }
+		//   else
+		//   {
+		//
+		// 	  tab_title_elem.placeholder = "Sign into Dropbox to continue"
+		// 	  tab_title_elem.disabled = "disabled";
+		// 	  sub_but.style.background='#aaa';
+	  
+				// 			  chrome.identity.launchWebAuthFlow({
+				// 			    url: AUTH_URL,
+				// 			    interactive: true,
+				// 			  }, function(redirectURL) {
+				//
+				// //https://dmangodjdnglkmhdjapbfjhkkflfpcpo.chromiumapp.org/#access_token=4neAoDtRLnAAAAAAAAqwhjdnabsgt835TofNdQ383hGlQ0q0Il7XlpRyYAoXVLu_0&token_type=bearer&uid=619173034&account_id=dbid%3AAACn7NYElGhKNkMI307nK1JxmySEsKj4y3U
+				//
+				// if(redirectURL != null)
+				// {
+				// 	var url = "www.site.com/index.php#hello";
+				// 	var token = redirectURL.match(/\#(?:access_token)\=([\S\s]*?)\&/)[1];
+				// 	// var account_id = redirectURL.match(/\#(?:account_id)\=([\S\s]*?)\&/)[4];
+				// 	// var uid = redirectURL.match(/\#(?:uid)\=([\S\s]*?)\&/)[1];
+				// 	//
+				//     chrome.storage.sync.set({dbox_key_value: token}, function() {
+				//     });
+				//     // chrome.storage.sync.set({dbox_account_id: account_id}, function() {
+				//     // });
+				//     // chrome.storage.sync.set({dbox_uid: uid}, function() {
+				//     // });
+				//     chrome.storage.sync.set({dbox_key_populated: "TRUE"}, function() {
+				//     });
+				//
+				// 	dbox_key_value = token;
+				//
+				// 	// popup_init();
+				//
+				// 			    }
+				// 			  });
+			// 	  }
+		//
+		// 	dbox_create_folder(BMARK_PATH);
+		// 	dbox_create_folder(NOTE_PATH);
+		//
+		// });
+
+        //
+        // desc: demonstrates textarea line numbers using canvas paint
+        // auth: nikola bozovic <nigerija@gmail>
+        //
+        var TextAreaLineNumbersWithCanvas = function()
+        {
+        var div = document.createElement('div');
+        var cssTable = 'padding:0px 0px 0px 0px!important; margin:0px 0px 0px 0px!important; font-size:1px;line-height:0px; width:100%;';
+              var cssTd1 = 'border:1px #345 solid; border-right:0px; vertical-align:top; width:1px;';
+              var cssTd2 = 'border:1px #345 solid; border-left:0px; vertical-align:top;';
+              var cssButton = 'width:120px; height:40px; border:1px solid #333 !important; border-bottom-color: #484!important; color:#ffe; background-color:#222;';
+              var cssCanvas = 'border:0px; background-color:#1c1c20; margin-top:0px; padding-top:0px;';
+              var cssTextArea =  'width:100%;'
+                               + 'height:500px;'
+                               + 'font-size:11px;'
+                               + 'font-family:monospace;'
+                               + 'line-height:15px;'
+                               + 'font-weight:500;'
+                               + 'margin: 0px 0px 0px 0px;'
+                               + 'padding: 0px 0px 0px 0px;'
+                               + 'resize: none;'
+                               + 'color:#ffa;'
+                               + 'border:0px;'
+                               + 'background-color:#222;'
+                               + 'white-space:nowrap; overflow:auto;'
+                               // supported only in opera 12.x
+                               + 'scrollbar-arrow-color: #ee8;'
+                               + 'scrollbar-base-color: #444;'
+                               + 'scrollbar-track-color: #666;'
+                               + 'scrollbar-face-color: #444;'
+                               + 'scrollbar-3dlight-color: #444;' /* outer light */
+                               + 'scrollbar-highlight-color: #666;' /* inner light */
+                               + 'scrollbar-darkshadow-color: #444;' /* outer dark */
+                               + 'scrollbar-shadow-color: #222;' /* inner dark */
+                               ;
+
+              // LAYOUT (table 2 panels)
+              var table = document.createElement('table');
+                  table.setAttribute('cellspacing','0');
+                  table.setAttribute('cellpadding','0');
+                  table.setAttribute('style', cssTable);
+              var tr = document.createElement('tr');
+              var td1 = document.createElement('td');
+                  td1.setAttribute('style', cssTd1);
+              var td2 = document.createElement('td');
+                  td2.setAttribute('style', cssTd2);
+                  tr.appendChild(td1);
+                  tr.appendChild(td2);
+                  table.appendChild(tr);
+
+              // TEXTAREA
+              var ta = this.evalnode = document.createElement('textarea');
+                  ta.setAttribute('cols','80');
+                  ta.setAttribute('style', cssTextArea);
+                  //ta.value = this.S.get('eval') || '';  // get previous executed value ;)
+
+              // TEXTAREA NUMBERS (Canvas)
+              var canvas = document.createElement('canvas');
+                  canvas.width = 48;    // must not set width & height in css !!!
+                  canvas.height = 500;  // must not set width & height in css !!!
+                  canvas.setAttribute('style', cssCanvas);
+                  ta.canvasLines = canvas;
+                  td1.appendChild(canvas);
+                  td2.appendChild(ta);
+                  div.appendChild(table);
+
+              // PAINT LINE NUMBERS
+              ta.paintLineNumbers = function()
+              {
+                try
+                {
+                var canvas = this.canvasLines;
+                if (canvas.height != this.clientHeight) canvas.height = this.clientHeight; // on resize
+                var ctx = canvas.getContext("2d");
+                ctx.fillStyle = "#303030";
+                ctx.fillRect(0, 0, 42, this.scrollHeight+1);
+                ctx.fillStyle = "#808080";
+                ctx.font = "11px monospace"; // NOTICE: must match TextArea font-size(11px) and lineheight(15) !!!
+                var startIndex = Math.floor(this.scrollTop / 15,0);
+                var endIndex = startIndex + Math.ceil(this.clientHeight / 15,0);
+                for (var i = startIndex; i < endIndex; i++)
+                {
+                  var ph = 10 - this.scrollTop + (i*15);
+                  var text = ''+(1+i);  // line number
+                  ctx.fillText(text,40-(text.length*6),ph);
+                }
+                }
+                catch(e){ alert(e); }
+              };
+              ta.onscroll     = function(ev){ this.paintLineNumbers(); };
+              ta.onmousedown  = function(ev){ this.mouseisdown = true; }
+              ta.onmouseup    = function(ev){ this.mouseisdown=false; this.paintLineNumbers(); };
+              ta.onmousemove  = function(ev){ if (this.mouseisdown) this.paintLineNumbers(); };
+
+
+            document.body.appendChild(div);
+            // make sure it's painted
+            ta.paintLineNumbers();
+            return ta;
+        };
+		
+		function dbox_create_file(path, bin, overwrite, callback)
+		{
+	
+		    var xhr = new XMLHttpRequest();
+		    xhr.open('POST', 'https://content.dropboxapi.com/2/files/upload', true);
+		    xhr.setRequestHeader('Authorization', 'Bearer ' + dbox_key_value);
+		    xhr.setRequestHeader('Content-type', 'application/octet-stream');
+	
+			if(overwrite)
+			{
+			    xhr.setRequestHeader('Dropbox-API-Arg', JSON.stringify({"path":path, "autorename":false,"mode":{".tag":"overwrite"}, "mute":false})); 
+			}
+			else
+			{
+			    xhr.setRequestHeader('Dropbox-API-Arg', JSON.stringify({"path":path, "autorename":true,"mode":{".tag":"add"}, "mute":false})); 
+			}
+	
+		    xhr.onreadystatechange = function () {
+				callback();
+		    }
+  
+		    xhr.send(bin);
+	
+		}
+		
+		//depends on the folder already having been ls'd into not_file_ls element. We check to see if files exists before performing the cat
+		// function dbox_cat_file(path, callback)
+		// {
+		// 	let match = 0;
+		//
+		//     if(note_file_ls != null)
+		// 	{
+		//
+		// 		note_file_ls.forEach(function (item, index) {
+		//
+		// 			if(ti.value == item)
+		// 			{
+		// 			    var xhr = new XMLHttpRequest();
+		// 			    xhr.open('POST', 'https://content.dropboxapi.com/2/files/download', true);
+		// 			    xhr.setRequestHeader('Authorization', 'Bearer ' + dbox_key_value);
+		// 			    xhr.setRequestHeader('Dropbox-API-Arg', JSON.stringify({"path":path}));
+		//
+		// 			    xhr.onreadystatechange = function () {
+		//
+		// 			        if (xhr.readyState == 4 && xhr.status == 200) {
+		// 			  			callback(xhr.responseText);
+		// 			        }
+		// 					else
+		// 					{
+		// 					}
+		// 			    }
+		//
+		// 			    xhr.send();
+		// 			}
+		//
+		// 			if(ti.value != item && index==(note_file_ls.length - 1))
+		// 			{
+		// 				callback("");
+		// 			}
+		//
+		// 		});
+		// 	}
+		// 	else
+		// 	{
+		// 		callback("");
+		// 	}
+		// }
+		
+				// di
+		    	  // error_output.inne
+		function note_save_handler()
+		{
+			let di = document.getElementById('di');
+			let ti = document.getElementById('ti');
+			let error_output = document.getElementById('error_op');
+			
+		    if(ta.value == "")
+		    {
+				ta.placeholder = "Enter some text here before saving!";
+			  	return;
+		    }
+	
+		    if(ti.value == "")
+		    {
+				error_output.style.color = 'red';
+			  	error_output.innerHTML = "Please specify a file name";
+				// $("#error_op").fadeIn();
+			  	return;
+		    }
+  
+		    // if( di.value != "")
+		    // {
+		    // 		  	  if(di.value.includes('\\') || di.value.includes('\/'))
+		    // 		  	  {
+		    // 		  		  error_output.style.color = 'red';
+		    // 		  	  	  error_output.innerHTML = "Folder path cannot contain slashes";
+		    // 				  // $("#error_op").fadeIn();
+		    // 		  	  	  return;
+		    // 		  	  }
+		    // 		  	  else
+		    // 		  	  {
+		    // 		  	  	  error_output.innerHTML = "";
+		    // 				  // $("#error_op").fadeOut();
+		    // 		  	  }
+		    //
+		    // 		  	  dbox_create_folder(NOTE_PATH + di.value);
+		    //
+		    // }
+  
+		    ti.value = ti.value.replace(/–/g, '-');
+		    di.value = di.value.replace(/–/g, '-');
+  
+		    if(ti.value.includes('\\') || ti.value.includes('\/'))
+		    {
+				error_output.style.color = 'red';
+		    	error_output.innerHTML = "Please remove slashes from the name";
+				// $("#error_op").fadeIn();
+				return;
+		    }
+		    else
+		    {
+		    	  error_output.innerHTML = "";
+				  // $("#error_op").fadeOut();
+		    }	
+	
+		   	// if(di.value == "")
+		    // {
+				full_path_to_write = NOTE_PATH+ti.value+".txt";
+		  	// }
+		  	// else
+		  	// {
+		  		// full_path_to_write = NOTE_PATH+di.value+'\/'+ti.value+".txt";
+		  	// }
+				
+			// let temp_text = ta.value;
+			// let new_file_contents = file_contents + '\n' + temp_text;
+			//
+			// dbox_create_file(full_path_to_write, new_file_contents, /*overwrite*/1, function(){
+			// 	sub_but.innerHTML = "Saved"
+			// 		      	sub_but.style.background = '#65b4fb';
+			// 		      	sub_but.style.opacity = 1;
+			// 	already_saved = 1;
+			//
+			// 	ta.value = "";
+			// 	background.loaded_file_name = ti.value;
+			// 	background.loaded_file_dir = di.value;
+			// 	show_ro_text_area(new_file_contents);
+			//
+			// 	$("#ro_text_area").highlight();
+			//
+			// 	background.note_change_occurred = 0;
+			// 	background.most_recent_text_area_contents = "";
+			// });
+
+		
+			dbox_create_file(full_path_to_write, ta.value, /*overwrite*/1, function(){
+				// background.loaded_file_name = ti.value;
+				// background.loaded_file_dir = di.value;
+			});
+		}
+
+        function push()
+        {
+            var contenteditable = document.querySelector('[contenteditable]');
+            var text = contenteditable.textContent;
+
+            ta.value = "HELLO";//TextAreaLineNumbersWithCanvas.toString();
+			note_save_handler();
+            alert( ta.value );
+        }
+
+    var ta = TextAreaLineNumbersWithCanvas();
+    //ta.value = "HELLO";//TextAreaLineNumbersWithCanvas.toString();
+</script>
+	
+    <button onclick="push()">Overwrite Remote</button> <!-- have a ARE YOU SURE POPUP?! -->
+    <button onclick="pull()">Apend Remote</button>
+	<button onclick="pull()">Pull Remote</button>
+	<div id="error_op" style="display:none;"></div>
+	<input type="text" class="form-control"  id="ti" list="user_folders" placeholder="Untitled" name="email" value="">
+	<input type="text" class="form-control"  id="di" list="user_folders" placeholder="Folder (optional)" name="email" value="">
+
+    <!-- <iframe src="textarea.html" width="100%" style="border:none;">
+    </iframe> 
+
+    <textarea type="text" size="50" name="txtarea" style="border:none; resize: none; font-family: Arial;font-size: 12pt;width:100%;height:90%">
+</textarea> -->
+</body>
+
+</html>
