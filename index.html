@@ -86,9 +86,10 @@ Untitled
 		
 		if(queryString == "")
 		{
-			window.location.href = AUTH_URL;
+			// window.location.href = AUTH_URL;
+			console.log("Founs something!");
 		}
-		
+				
 		// chrome.storage.sync.get('dbox_key_populated', function(data) {
 		//   // changeColor.style.backgroundColor = data.color;
 		//   // changeColor.setAttribute('value', data.color);
@@ -415,6 +416,10 @@ Untitled
             alert( ta.value );
         }
 		
+		function login()
+		{
+			window.location.href = AUTH_URL;
+		}
 
     var ta = TextAreaLineNumbersWithCanvas();
     //ta.value = "HELLO";//TextAreaLineNumbersWithCanvas.toString();
@@ -423,6 +428,7 @@ Untitled
     <button onclick="push()">Overwrite Remote</button> <!-- have a ARE YOU SURE POPUP?! -->
     <button onclick="pull()">Apend Remote</button>
 	<button onclick="pull()">Pull Remote</button>
+	<button onclick="login()">Log in to Dropbox</button>
 	<div id="error_op" style="display:none;"></div>
 	<input type="text" class="form-control"  id="ti" list="user_folders" placeholder="Untitled" name="email" value="">
 	<input type="text" class="form-control"  id="di" list="user_folders" placeholder="Folder (optional)" name="email" value="">
