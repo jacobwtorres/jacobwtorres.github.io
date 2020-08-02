@@ -46,22 +46,13 @@
     }
 </style>
 
-<header contenteditable="true" rows=3>
-Untitled
-</header>
 
-<body style="overflow:hidden;" bgcolor="#333">
+<body onload="init()" style="overflow:hidden;" bgcolor="#333">
     <script>
-
-    </script>
-
-
-    <script>
-		
 		let page_url = "";
 		let page_name = "";
 
-		let dbox_key_value = '4neAoDtRLnAAAAAAAAAsiehPj-8NUSr-oypvdRR-wnI';		
+		let dbox_key_value = '';		
 		let CLIENT_ID = 'p4p60gowtlk2vl9';
 		// var CALLBACK_URL = 'https://'+chrome.runtime.id+'.chromiumapp.org';
 		let AUTH_URL = 'https://www.dropbox.com/oauth2/authorize?client_id=' + CLIENT_ID + '&response_type=token' + '&redirect_uri=' + 'https://jacobwtorres.github.io/';
@@ -72,77 +63,108 @@ Untitled
 		let current_note_path = "";
 		let already_saved = 0;
 		let full_path_to_write = "";
-		let lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+
 		let cached_note = 0; //cached note is loaded only if the exact version was never properly loaded to dropbox
 		
 		let bmark_dir_ls = [];
 		let note_dir_ls = [];
 		let note_file_ls = [];
 		
-		const queryString = window.location.search;
-		console.log(queryString);
-		const urlParams = new URLSearchParams(queryString);
-		// const product = urlParams.get('product');
-		
-		if(queryString == "")
+		// document.onload = function()
+		function init()
 		{
-			// window.location.href = AUTH_URL;
-			console.log("Founs something!");
+			
+			//load in dbx credentials
+			if (localStorage.getItem("dbox_token") === null)
+			{
+			  	//TODO populate login button
+				let pu = document.getElementById('push');
+				pu.style.display = "none";
+			}
+			else
+			{
+				let lo = document.getElementById('log');
+				let pu = document.getElementById('push');
+				pu.style.display = "inline";
+				lo.value = "Logout";
+				dbox_key_value = localStorage.getItem("dbox_token");
+			}
+		
+			// //load in dbx credentials
+			// if (localStorage.getItem("file_cache") === null)
+			// {
+			//
+			// }
+			// else
+			// {
+			// 	ta.value = localStorage.getItem("file_cache");
+			// }
+		
+			console.log("Token=")
+			console.log(localStorage.getItem("dbox_token"))
+		
+			var queryString = new URL(window.location.href.replace(/#/g,"?"));
+			console.log(queryString);
+		
+			if(queryString != "")
+			{
+				// window.location.href = AUTH_URL;
+				let token = queryString.searchParams.get("access_token");
+				console.log(token);
+			
+				//TODO check for valid token
+			
+				localStorage.setItem("dbox_token", token);
+
+				dbox_key_value = token;
+			}
+			
+				dbox_create_folder(BMARK_PATH);
+				dbox_create_folder(NOTE_PATH);
+		
 		}
-				
-		// chrome.storage.sync.get('dbox_key_populated', function(data) {
-		//   // changeColor.style.backgroundColor = data.color;
-		//   // changeColor.setAttribute('value', data.color);
-		//
-		//   if( data.dbox_key_populated == "TRUE")
-		//   {
-		//   	chrome.storage.sync.get('dbox_key_value', function(data) {
-		// 		dbox_key_value = data.dbox_key_value;
-		// 		popup_init();
-		//   	});
-		//   }
-		//   else
-		//   {
-		//
-		// 	  tab_title_elem.placeholder = "Sign into Dropbox to continue"
-		// 	  tab_title_elem.disabled = "disabled";
-		// 	  sub_but.style.background='#aaa';
-	  
-				// 			  chrome.identity.launchWebAuthFlow({
-				// 			    url: AUTH_URL,
-				// 			    interactive: true,
-				// 			  }, function(redirectURL) {
-				//
-				// //https://dmangodjdnglkmhdjapbfjhkkflfpcpo.chromiumapp.org/#access_token=4neAoDtRLnAAAAAAAAqwhjdnabsgt835TofNdQ383hGlQ0q0Il7XlpRyYAoXVLu_0&token_type=bearer&uid=619173034&account_id=dbid%3AAACn7NYElGhKNkMI307nK1JxmySEsKj4y3U
-				//
-				// if(redirectURL != null)
-				// {
-				// 	var url = "www.site.com/index.php#hello";
-				// 	var token = redirectURL.match(/\#(?:access_token)\=([\S\s]*?)\&/)[1];
-				// 	// var account_id = redirectURL.match(/\#(?:account_id)\=([\S\s]*?)\&/)[4];
-				// 	// var uid = redirectURL.match(/\#(?:uid)\=([\S\s]*?)\&/)[1];
-				// 	//
-				//     chrome.storage.sync.set({dbox_key_value: token}, function() {
-				//     });
-				//     // chrome.storage.sync.set({dbox_account_id: account_id}, function() {
-				//     // });
-				//     // chrome.storage.sync.set({dbox_uid: uid}, function() {
-				//     // });
-				//     chrome.storage.sync.set({dbox_key_populated: "TRUE"}, function() {
-				//     });
-				//
-				// 	dbox_key_value = token;
-				//
-				// 	// popup_init();
-				//
-				// 			    }
-				// 			  });
-			// 	  }
-		//
-		// 	dbox_create_folder(BMARK_PATH);
-		// 	dbox_create_folder(NOTE_PATH);
-		//
-		// });
+		
+		function dbox_revoke_key(callback)
+		{
+		    var xhr = new XMLHttpRequest();
+		    xhr.open('POST', 'https://api.dropboxapi.com/2/auth/token/revoke', true);
+		    xhr.setRequestHeader('Authorization', 'Bearer ' + dbox_key_value);
+
+		    xhr.onreadystatechange = function (){
+		        if (xhr.readyState == 4 && xhr.status == 200) {
+					callback(0);
+		        }
+				else
+				{
+					callback(1);
+				}
+		    }
+			
+		    xhr.send();
+		}
+
+		function dbox_create_folder(path)
+		{
+		    var xhr = new XMLHttpRequest();
+		    xhr.open('POST', 'https://api.dropboxapi.com/2/files/create_folder_v2', true);
+		    xhr.setRequestHeader('Authorization', 'Bearer ' + dbox_key_value);
+		    xhr.setRequestHeader('Content-type', 'application/json');
+
+		    xhr.onreadystatechange = function () {
+		        if (xhr.readyState == 4 && xhr.status == 200) {
+					console.log("Good");
+		        }
+				else
+				{
+					//dbox_revoke_key();
+					console.log("Bad " + xhr.status);
+				}
+		    }
+
+		    var data = JSON.stringify({"path":path});
+
+		    xhr.send(data);
+		}
 
         //
         // desc: demonstrates textarea line numbers using canvas paint
@@ -261,10 +283,18 @@ Untitled
 			{
 			    xhr.setRequestHeader('Dropbox-API-Arg', JSON.stringify({"path":path, "autorename":true,"mode":{".tag":"add"}, "mute":false})); 
 			}
-	
-		    xhr.onreadystatechange = function () {
-				callback();
+
+		    xhr.onreadystatechange = function (){
+		        if (xhr.readyState == 4 && xhr.status == 200) {
+					callback(0);
+		        }
+				else
+				{
+					callback(1);
+				}
 		    }
+			
+		    xhr.send();
   
 		    xhr.send(bin);
 	
@@ -321,6 +351,10 @@ Untitled
 			let ti = document.getElementById('ti');
 			let error_output = document.getElementById('error_op');
 			
+			console.log(di.value);
+			console.log(ti.value);
+			console.log(ta.value);
+			
 		    if(ta.value == "")
 		    {
 				ta.placeholder = "Enter some text here before saving!";
@@ -371,12 +405,12 @@ Untitled
 		    }	
 	
 		   	// if(di.value == "")
-		    // {
+		   	// 		    {
 				full_path_to_write = NOTE_PATH+ti.value+".txt";
 		  	// }
 		  	// else
 		  	// {
-		  		// full_path_to_write = NOTE_PATH+di.value+'\/'+ti.value+".txt";
+		  	// 	full_path_to_write = NOTE_PATH+di.value+'\/'+ti.value+".txt";
 		  	// }
 				
 			// let temp_text = ta.value;
@@ -399,45 +433,65 @@ Untitled
 			// 	background.most_recent_text_area_contents = "";
 			// });
 
-		
-			dbox_create_file(full_path_to_write, ta.value, /*overwrite*/1, function(){
-				// background.loaded_file_name = ti.value;
-				// background.loaded_file_dir = di.value;
+			dbox_create_file(full_path_to_write, ta.value, /*overwrite*/1, function(ret){
+				if(ret == 0)
+				{
+					alert("Success");
+				}
+				else
+				{
+					alert("Failed. Data not backed up.");
+				}
 			});
 		}
-
-        function push()
-        {
-            var contenteditable = document.querySelector('[contenteditable]');
-            var text = contenteditable.textContent;
-
-            ta.value = "HELLO";//TextAreaLineNumbersWithCanvas.toString();
-			note_save_handler();
-            alert( ta.value );
-        }
 		
-		function login()
+		function log()
 		{
-			window.location.href = AUTH_URL;
+			let lo = document.getElementById('log');
+			console.log(lo.value)
+			
+			if(lo.value == "Login")
+			{
+				window.location.href = AUTH_URL;
+			}
+			else
+			{
+				let pu = document.getElementById('push');
+				
+				localStorage.removeItem("dbox_token");
+				dbox_key_value = '';
+				pu.style.display = "none";
+				lo.value = "Login";
+				
+				dbox_revoke_key(function(ret){
+					if(ret == 0)
+					{
+						alert("Logout success");
+					}
+					else
+					{
+						alert("Logout failed");
+					}
+				});
+				
+				console.log("Token revoke not yet implemented");
+			}
 		}
 
-    var ta = TextAreaLineNumbersWithCanvas();
-    //ta.value = "HELLO";//TextAreaLineNumbersWithCanvas.toString();
-</script>
-	
-    <button onclick="push()">Overwrite Remote</button> <!-- have a ARE YOU SURE POPUP?! -->
-    <button onclick="pull()">Apend Remote</button>
-	<button onclick="pull()">Pull Remote</button>
-	<button onclick="login()">Log in to Dropbox</button>
-	<div id="error_op" style="display:none;"></div>
-	<input type="text" class="form-control"  id="ti" list="user_folders" placeholder="Untitled" name="email" value="">
-	<input type="text" class="form-control"  id="di" list="user_folders" placeholder="Folder (optional)" name="email" value="">
+    	var ta = TextAreaLineNumbersWithCanvas();
+	</script>
+		
+	<inline>
+    <!-- <button onclick="pull()">Pull Before</button>
+	<button onclick="pull()">Pull After</button> -->
+	<input id="push" type="button" onclick="note_save_handler()" value="Push">
+	<input id="log" type="button" onclick="log()" value="Login">
+	<input type="text" class="form-control"  id="ti" list="user_folders" placeholder="Untitled" value="">
+	<input type="text" class="form-control"  id="di" list="user_folders" placeholder="Folder (optional)" value="" style="display:none;">
 
-    <!-- <iframe src="textarea.html" width="100%" style="border:none;">
-    </iframe> 
-
-    <textarea type="text" size="50" name="txtarea" style="border:none; resize: none; font-family: Arial;font-size: 12pt;width:100%;height:90%">
-</textarea> -->
+	<!-- <div id="error_op" style="display:none;"></div> -->
+	<div id="error_op"></div>
+	</inline>
 </body>
 
 </html>
