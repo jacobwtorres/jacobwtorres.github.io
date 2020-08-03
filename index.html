@@ -114,8 +114,8 @@
 							console.log("Key worked");
 							// localStorage.setItem("dbox_token", dbox_key_value);
 							// localStorage.setItem("dbox_account_id", dbox_account_id);
-							dbox_create_folder(BMARK_PATH); //these might not ever get hit
-							dbox_create_folder(NOTE_PATH);
+							// dbox_create_folder(BMARK_PATH); //these might not ever get hit
+							// dbox_create_folder(NOTE_PATH);
 							window.location.href = THISURL;
 						}
 						else
@@ -134,14 +134,11 @@
 			}
 			
 			
-			
-			
-			
 			console.log("Token=")
 			console.log(localStorage.getItem("dbox_token"))
 			
 			//load in dbx credentials
-			if (localStorage.getItem("dbox_token") === null)
+			if (localStorage.getItem("dbox_token") == '')
 			{
 				console.log("Key NOT found in storage");
 			  	//TODO populate login button
@@ -172,6 +169,9 @@
 					else
 					{
 						console.log("Key NOT working");
+						pu.style.display = "none";
+						pu.style.visibility = 'hidden';
+						lo.value = "Login";
 					}
 					
 				})
@@ -198,6 +198,8 @@
 		
 		function dbox_key_check(callback)
 		{
+			console.log("Account_id=" + dbox_account_id);
+			
 			dbox_account_id = localStorage.getItem("dbox_account_id");
 			
 			console.log("Account_id=" + dbox_account_id);
