@@ -91,10 +91,28 @@
 		
 		var change = () => changed_handler();
 		
+		
+		
+		function save_loop()
+		{			
+			console.log("Cache now!!!");
+			let di = document.getElementById('di');
+			let ti = document.getElementById('ti');
+		
+			localStorage.setItem("ta.value", ta.value)
+			localStorage.setItem("ti.value", ti.value)
+			localStorage.setItem("di.value", di.value)
+			
+			clearTimeout(timer);
+			timer = setTimeout(save_loop, 10000);
+		}
+		
 		// document.onload = function()
 		function init()
 		{
-			console.log("NEW0");
+			console.log("Save loop init");
+			
+			save_loop();
 			
 			let di = document.getElementById('di');
 			let ti = document.getElementById('ti');
@@ -568,11 +586,6 @@
 			{
 				let pu = document.getElementById('push');
 				
-				localStorage.removeItem("dbox_token");
-				dbox_key_value = '';
-				pu.style.display = "none";
-				lo.value = "Login to Dropbox";
-				
 				dbox_revoke_key(function(ret){
 					if(ret == 200)
 					{
@@ -586,6 +599,10 @@
 					}
 				});
 				
+				localStorage.removeItem("dbox_token");
+				dbox_key_value = '';
+				pu.style.display = "none";
+				lo.value = "Login to Dropbox";
 			}
 		}
 		var ta = TextAreaLineNumbersWithCanvas();
