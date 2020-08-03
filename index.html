@@ -72,9 +72,21 @@
 		let note_dir_ls = [];
 		let note_file_ls = [];
 		
+		var timer;
+
 		function changed_handler()
 		{
-			console.log(ta.value);
+			console.log("change");
+			clearTimeout(timer);
+			timer = setTimeout(function(){
+				console.log("Cache now!!!");
+				let di = document.getElementById('di');
+				let ti = document.getElementById('ti');
+			
+				ta.value = localStorage.getItem("ta.value")
+				ti.value = localStorage.getItem("ti.value")
+				di.value = localStorage.getItem("di.value")
+			}, 3000);
 		}
 		
 		var change = () => changed_handler();
@@ -576,7 +588,8 @@
 			}
 		}
 		var ta = TextAreaLineNumbersWithCanvas();
-		ta.oninput="change();";
+		ta.oninput="alert();";
+		alert();
 
     	// var ta = TextAreaLineNumbersWithCanvas();
 	</script>
