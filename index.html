@@ -75,7 +75,14 @@
 		// document.onload = function()
 		function init()
 		{
-			console.log("NEW");
+			console.log("NEW0");
+			
+			let di = document.getElementById('di');
+			let ti = document.getElementById('ti');
+			
+			ta.value = localStorage.getItem("ta.value")
+			ti.value = localStorage.getItem("ti.value")
+			di.value = localStorage.getItem("di.value")
 			
 			//TODO load in file cache immediately after text area
 			// //load in dbx credentials
@@ -427,6 +434,10 @@
 			console.log(ti.value);
 			console.log(ta.value);
 			
+			localStorage.setItem("ti.value", ti.value);
+			localStorage.setItem("di.value", di.value);
+			localStorage.setItem("ta.value", ta.value);
+			
 		    if(ta.value == "")
 		    {
 				ta.placeholder = "Enter some text here before saving!";
@@ -521,6 +532,13 @@
 		{
 			let lo = document.getElementById('log');
 			console.log(lo.value)
+			
+			let di = document.getElementById('di');
+			let ti = document.getElementById('ti');
+			
+			localStorage.setItem("ti.value", ti.value);
+			localStorage.setItem("di.value", di.value);
+			localStorage.setItem("ta.value", ta.value);
 			
 			if(lo.value == "Login")
 			{
