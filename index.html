@@ -111,15 +111,15 @@
 		function init()
 		{
 			console.log("Save loop init");
-			
-			save_loop();
-			
+					
 			let di = document.getElementById('di');
 			let ti = document.getElementById('ti');
 			
 			ta.value = localStorage.getItem("ta.value")
 			ti.value = localStorage.getItem("ti.value")
 			di.value = localStorage.getItem("di.value")
+		
+			save_loop();
 			
 			//TODO load in file cache immediately after text area
 			// //load in dbx credentials
