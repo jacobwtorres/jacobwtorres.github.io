@@ -362,6 +362,7 @@
               ta.onmouseup    = function(ev){ this.mouseisdown=false; this.paintLineNumbers(); };
               ta.onmousemove  = function(ev){ if (this.mouseisdown) this.paintLineNumbers(); };
 
+              ta.onchange  = function(ev){console.log("change");};
 
             document.body.appendChild(div);
             // make sure it's painted
@@ -588,7 +589,8 @@
 			}
 		}
 		var ta = TextAreaLineNumbersWithCanvas();
-		ta.oninput="alert();";
+		// ta.oninput="alert();";
+		// ta.setAttribute('ninput','"alert();"');
 		alert();
 
     	// var ta = TextAreaLineNumbersWithCanvas();
