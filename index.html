@@ -97,27 +97,29 @@
 				// window.location.href = AUTH_URL;
 				dbox_key_value = queryString.searchParams.get("access_token");
 				console.log("Found New token: " + dbox_key_value);
-							
-				dbox_key_check(function(ret){
-					if(ret == 200)
-					{
-						console.log("Key worked");
-						localStorage.setItem("dbox_token", token);
-						dbox_create_folder(BMARK_PATH);
-						dbox_create_folder(NOTE_PATH);
-					}
-					else
-					{
-						console.log("Key NOT working");
-						alert(	"we're sorry that login failed. The token returned to us did not check out. To be safe we are still logging you out of all accounts.");
-						localStorage.removeItem("dbox_token");
-						window.location.href = THISURL;
-					}
+				
+				if(dbox_key_value != null)
+				{			
+					dbox_key_check(function(ret){
+						if(ret == 200)
+						{
+							console.log("Key worked");
+							localStorage.setItem("dbox_token", token);
+							dbox_create_folder(BMARK_PATH);
+							dbox_create_folder(NOTE_PATH);
+						}
+						else
+						{
+							console.log("Key NOT working");
+							alert(	"we're sorry that login failed. The token returned to us did not check out. To be safe we are still logging you out of all accounts.");
+							localStorage.removeItem("dbox_token");
+							window.location.href = THISURL;
+						}
 					
-				})
+					})
 	
-				return;
-
+					return;
+				}
 			}
 			
 			
