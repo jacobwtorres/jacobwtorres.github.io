@@ -73,23 +73,6 @@
 		let note_file_ls = [];
 		
 		var timer;
-
-		function changed_handler()
-		{
-			console.log("change");
-			clearTimeout(timer);
-			timer = setTimeout(function(){
-				console.log("Cache now!!!");
-				let di = document.getElementById('di');
-				let ti = document.getElementById('ti');
-			
-				ta.value = localStorage.getItem("ta.value")
-				ti.value = localStorage.getItem("ti.value")
-				di.value = localStorage.getItem("di.value")
-			}, 3000);
-		}
-		
-		var change = () => changed_handler();
 		
 		
 		
@@ -98,13 +81,18 @@
 			console.log("Cache now!!!");
 			let di = document.getElementById('di');
 			let ti = document.getElementById('ti');
-		
+			
+			if(ta.value == "")
+			{
+				return;
+			}
+					
 			localStorage.setItem("ta.value", ta.value)
 			localStorage.setItem("ti.value", ti.value)
 			localStorage.setItem("di.value", di.value)
 			
 			clearTimeout(timer);
-			timer = setTimeout(save_loop, 10000);
+			timer = setTimeout(save_loop, 5000);
 		}
 		
 		// document.onload = function()
@@ -120,18 +108,6 @@
 			di.value = localStorage.getItem("di.value")
 		
 			save_loop();
-			
-			//TODO load in file cache immediately after text area
-			// //load in dbx credentials
-			// if (localStorage.getItem("file_cache") === null)
-			// {
-			//
-			// }
-			// else
-			// {
-			// 	ta.value = localStorage.getItem("file_cache");
-			// }
-			
 			
 			var queryString = new URL(window.location.href.replace(/#/g,"?"));
 			console.log("queryString= " + queryString);
@@ -380,7 +356,7 @@
               ta.onmouseup    = function(ev){ this.mouseisdown=false; this.paintLineNumbers(); };
               ta.onmousemove  = function(ev){ if (this.mouseisdown) this.paintLineNumbers(); };
 
-              ta.onchange  = function(ev){console.log("change");};
+              ta.onchange  = function(ev){console.log("change"); save_loop();};
 
             document.body.appendChild(div);
             // make sure it's painted
@@ -472,9 +448,7 @@
 			console.log(ti.value);
 			console.log(ta.value);
 			
-			localStorage.setItem("ti.value", ti.value);
-			localStorage.setItem("di.value", di.value);
-			localStorage.setItem("ta.value", ta.value);
+			save_loop();
 			
 		    if(ta.value == "")
 		    {
@@ -571,12 +545,7 @@
 			let lo = document.getElementById('log');
 			console.log(lo.value)
 			
-			let di = document.getElementById('di');
-			let ti = document.getElementById('ti');
-			
-			localStorage.setItem("ti.value", ti.value);
-			localStorage.setItem("di.value", di.value);
-			localStorage.setItem("ta.value", ta.value);
+			save_loop();
 			
 			if(lo.value == "Login to Dropbox")
 			{
@@ -606,10 +575,6 @@
 			}
 		}
 		var ta = TextAreaLineNumbersWithCanvas();
-		// ta.oninput="alert();";
-		// ta.setAttribute('onchange','alert();');
-
-    	// var ta = TextAreaLineNumbersWithCanvas();
 	</script>
 		
 	<inline>
