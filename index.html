@@ -131,14 +131,15 @@
 		    xhr.setRequestHeader('Authorization', 'Bearer ' + dbox_key_value);
 
 		    xhr.onreadystatechange = function (){
+				console.log("Revoke" + xhr.status)
 		        if (xhr.readyState == 4 && xhr.status == 200) {
 					callback(0);
 		        }
-				else
+				else if(xhr.readyState == 4)
 				{
 					callback(1);
 				}
-		    }
+		    }  
 			
 		    xhr.send();
 		}
@@ -150,14 +151,14 @@
 		    xhr.setRequestHeader('Authorization', 'Bearer ' + dbox_key_value);
 		    xhr.setRequestHeader('Content-type', 'application/json');
 
-		    xhr.onreadystatechange = function () {
+		    xhr.onreadystatechange = function (){
+				console.log("Create" + xhr.status)
 		        if (xhr.readyState == 4 && xhr.status == 200) {
-					console.log("Good");
+					callback(0);
 		        }
-				else
+				else if(xhr.readyState == 4)
 				{
-					//dbox_revoke_key();
-					console.log("Bad " + xhr.status);
+					callback(1);
 				}
 		    }
 
@@ -285,16 +286,17 @@
 			}
 
 		    xhr.onreadystatechange = function (){
+				console.log("Upload" + xhr.status)
 		        if (xhr.readyState == 4 && xhr.status == 200) {
 					callback(0);
 		        }
-				else
+				else if(xhr.readyState == 4)
 				{
 					callback(1);
 				}
 		    }  
+			
 		    xhr.send(bin);
-	
 		}
 		
 		//depends on the folder already having been ls'd into not_file_ls element. We check to see if files exists before performing the cat
