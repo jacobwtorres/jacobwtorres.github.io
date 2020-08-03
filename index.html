@@ -49,14 +49,14 @@
 
 <body onload="init()" style="overflow:hidden;" bgcolor="#333">
     <script>
-		let URL = 'https://jacobwtorres.github.io/'
+		let THISURL = 'https://jacobwtorres.github.io/'
 		let page_url = "";
 		let page_name = "";
 
 		let dbox_key_value = '';		
 		let CLIENT_ID = 'p4p60gowtlk2vl9';
 		// var CALLBACK_URL = 'https://'+chrome.runtime.id+'.chromiumapp.org';
-		let AUTH_URL = 'https://www.dropbox.com/oauth2/authorize?client_id=' + CLIENT_ID + '&response_type=token' + '&redirect_uri=' + URL;
+		let AUTH_URL = 'https://www.dropbox.com/oauth2/authorize?client_id=' + CLIENT_ID + '&response_type=token' + '&redirect_uri=' + THISURL;
 		
 		let BMARK_PATH = "/Bookmarks/";
 		let NOTE_PATH = "/Notes/";
@@ -109,10 +109,9 @@
 					else
 					{
 						console.log("Key NOT working");
-						alert(	"we're sorry that login failed. The token returned to us did not check out."
-								"to be safe we are still logging you out of all accounts.");
+						alert(	"we're sorry that login failed. The token returned to us did not check out. To be safe we are still logging you out of all accounts.");
 						localStorage.removeItem("dbox_token");
-						window.location.href = URL;
+						window.location.href = THISURL;
 					}
 					
 				})
