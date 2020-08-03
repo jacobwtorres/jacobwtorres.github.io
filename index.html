@@ -102,14 +102,17 @@
 				dbox_account_id = queryString.searchParams.get("account_id");
 				console.log("Found New Account ID: " + dbox_account_id);
 				
+				localStorage.setItem("dbox_token", dbox_key_value);
+				localStorage.setItem("dbox_account_id", dbox_account_id);
+				
 				if(dbox_key_value != null && dbox_account_id != null)
 				{			
 					dbox_key_check(function(ret){
 						if(ret == 200)
 						{
 							console.log("Key worked");
-							localStorage.setItem("dbox_token", dbox_key_value);
-							localStorage.setItem("dbox_account_id", dbox_account_id);
+							// localStorage.setItem("dbox_token", dbox_key_value);
+							// localStorage.setItem("dbox_account_id", dbox_account_id);
 							dbox_create_folder(BMARK_PATH); //these might not ever get hit
 							dbox_create_folder(NOTE_PATH);
 							window.location.href = THISURL;
@@ -119,6 +122,7 @@
 							console.log("Key NOT working");
 							alert(	"We're sorry, but that login failed. The token returned to us did not check out. To be safe we are logging you out of all accounts.");
 							localStorage.removeItem("dbox_token");
+							localStorage.removeItem("dbox_account_id");
 							window.location.href = THISURL;
 						}
 					
@@ -194,6 +198,8 @@
 		function dbox_key_check(callback)
 		{
 			dbox_account_id = localStorage.getItem("dbox_account_id");
+			
+			console.log("Account_id=" + dbox_account_id);
 			
 		    var xhr = new XMLHttpRequest();
 		    xhr.open('POST', 'https://api.dropboxapi.com/2/users/get_account', true);
