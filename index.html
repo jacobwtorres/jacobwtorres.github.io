@@ -90,12 +90,25 @@
 			
 			console.log("Cache now!!!");
 					
-			window.localStorage.setItem("ta.value", ta.value)
-			window.localStorage.setItem("ti.value", ti.value)
-			window.localStorage.setItem("di.value", di.value)
+			localStorage.setItem("ta.value", ta.value)
+			localStorage.setItem("ti.value", ti.value)
+			localStorage.setItem("di.value", di.value)
 			
 			clearTimeout(timer);
 			timer = setTimeout(save_loop, 5000);
+		}
+		
+		function erase()
+		{
+			if(confirm("Press OK to confirm you would like to Erase this file."))
+			{
+				window.localStorage.removeItem("ta.value")
+				window.localStorage.removeItem("ti.value")
+				window.localStorage.removeItem("di.value")
+			
+				ta.value = '';
+				ti.value = '';
+			}
 		}
 		
 		// document.onload = function()
@@ -584,6 +597,7 @@
     <!-- <button onclick="pull()">Pull Before</button>
 	<button onclick="pull()">Pull After</button> -->
 	<input id="push" type="button" onclick="note_save_handler()" value="Push">
+	<input id="erase" type="button" onclick="erase()" value="Erase">
 	<input id="log" type="button" onclick="log()" value="Login to Dropbox">
 	<input type="text" class="form-control"  id="ti" list="user_folders" placeholder="Untitled" value="">
 	<input type="text" class="form-control"  id="di" list="user_folders" placeholder="Folder (optional)" value="" style="display:none;">
