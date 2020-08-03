@@ -72,6 +72,13 @@
 		let note_dir_ls = [];
 		let note_file_ls = [];
 		
+		function changed_handler()
+		{
+			console.log(ta.value);
+		}
+		
+		var change = () => changed_handler();
+		
 		// document.onload = function()
 		function init()
 		{
@@ -130,7 +137,7 @@
 						else
 						{
 							console.log("Key NOT working");
-							alert(	"We're sorry, but that login failed. The token returned to us did not check out. To be safe we are logging you out of all accounts.");
+							alert(	"We're sorry, but that Login to Dropbox failed. The token returned to us did not check out. To be safe we are logging you out of all accounts.");
 							localStorage.removeItem("dbox_token");
 							localStorage.removeItem("dbox_account_id");
 							window.location.href = THISURL;
@@ -150,12 +157,12 @@
 			if (localStorage.getItem("dbox_token") == '')
 			{
 				console.log("Key NOT found in storage");
-			  	//TODO populate login button
+			  	//TODO populate Login to Dropbox button
 				let pu = document.getElementById('push');
 				pu.style.visibility = 'hidden';
 				
 				let lo = document.getElementById('log');
-				lo.value = 'Login';
+				lo.value = 'Login to Dropbox';
 			}
 			else
 			{
@@ -180,7 +187,7 @@
 						console.log("Key NOT working");
 						pu.style.display = "none";
 						pu.style.visibility = 'hidden';
-						lo.value = "Login";
+						lo.value = "Login to Dropbox";
 					}
 					
 				})
@@ -540,7 +547,7 @@
 			localStorage.setItem("di.value", di.value);
 			localStorage.setItem("ta.value", ta.value);
 			
-			if(lo.value == "Login")
+			if(lo.value == "Login to Dropbox")
 			{
 				window.location.href = AUTH_URL;
 			}
@@ -551,22 +558,25 @@
 				localStorage.removeItem("dbox_token");
 				dbox_key_value = '';
 				pu.style.display = "none";
-				lo.value = "Login";
+				lo.value = "Login to Dropbox";
 				
 				dbox_revoke_key(function(ret){
 					if(ret == 200)
 					{
 						alert("Logout success");
+						window.location.href = THISURL;
 					}
 					else
 					{
 						alert("Logout failed");
+						window.location.href = THISURL;
 					}
 				});
 				
 			}
 		}
 		var ta = TextAreaLineNumbersWithCanvas();
+		ta.oninput="change();";
 
     	// var ta = TextAreaLineNumbersWithCanvas();
 	</script>
@@ -575,7 +585,7 @@
     <!-- <button onclick="pull()">Pull Before</button>
 	<button onclick="pull()">Pull After</button> -->
 	<input id="push" type="button" onclick="note_save_handler()" value="Push">
-	<input id="log" type="button" onclick="log()" value="Login">
+	<input id="log" type="button" onclick="log()" value="Login to Dropbox">
 	<input type="text" class="form-control"  id="ti" list="user_folders" placeholder="Untitled" value="">
 	<input type="text" class="form-control"  id="di" list="user_folders" placeholder="Folder (optional)" value="" style="display:none;">
 
