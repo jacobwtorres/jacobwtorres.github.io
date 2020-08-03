@@ -53,7 +53,8 @@
 		let page_url = "";
 		let page_name = "";
 
-		let dbox_key_value = '';		
+		let dbox_key_value = '';	
+		let dbox_account_id = '';	
 		let CLIENT_ID = 'p4p60gowtlk2vl9';
 		// var CALLBACK_URL = 'https://'+chrome.runtime.id+'.chromiumapp.org';
 		let AUTH_URL = 'https://www.dropbox.com/oauth2/authorize?client_id=' + CLIENT_ID + '&response_type=token' + '&redirect_uri=' + THISURL;
@@ -98,20 +99,25 @@
 				dbox_key_value = queryString.searchParams.get("access_token");
 				console.log("Found New token: " + dbox_key_value);
 				
-				if(dbox_key_value != null)
+				dbox_account_id = queryString.searchParams.get("account_id");
+				console.log("Found New Account ID: " + dbox_account_id);
+				
+				if(dbox_key_value != null && dbox_account_id != null)
 				{			
 					dbox_key_check(function(ret){
 						if(ret == 200)
 						{
 							console.log("Key worked");
-							localStorage.setItem("dbox_token", token);
-							dbox_create_folder(BMARK_PATH);
+							localStorage.setItem("dbox_token", dbox_key_value);
+							localStorage.setItem("dbox_account_id", dbox_account_id);
+							dbox_create_folder(BMARK_PATH); //these might not ever get hit
 							dbox_create_folder(NOTE_PATH);
+							window.location.href = THISURL;
 						}
 						else
 						{
 							console.log("Key NOT working");
-							alert(	"we're sorry that login failed. The token returned to us did not check out. To be safe we are still logging you out of all accounts.");
+							alert(	"We're sorry, but that login failed. The token returned to us did not check out. To be safe we are logging you out of all accounts.");
 							localStorage.removeItem("dbox_token");
 							window.location.href = THISURL;
 						}
@@ -148,6 +154,7 @@
 				console.log("Key FOUND in storage");
 				
 				dbox_key_value = localStorage.getItem("dbox_token");
+				dbox_account_id = localStorage.getItem("dbox_account_id");
 				
 				dbox_key_check(function(ret){
 					if(ret == 200)
@@ -186,18 +193,23 @@
 		
 		function dbox_key_check(callback)
 		{
+			dbox_account_id = localStorage.getItem("dbox_account_id");
+			
 		    var xhr = new XMLHttpRequest();
-		    xhr.open('POST', 'https://api.dropboxapi.com/2/check/app', true);
+		    xhr.open('POST', 'https://api.dropboxapi.com/2/users/get_account', true);
 		    xhr.setRequestHeader('Authorization', 'Bearer ' + dbox_key_value);
+			hr.setRequestHeader('Content-type', 'application/json');
 
 		    xhr.onreadystatechange = function (){
 				console.log("Check" + xhr.status)
 		        if (xhr.readyState == 4) {
 					callback(xhr.status);
 		        }
-		    }   
+		    }
 			
-		    xhr.send();
+			var data = JSON.stringify({"account_id":dbox_account_id});
+			
+		    xhr.send(data);
 		}
 
 		function dbox_create_folder(path)
