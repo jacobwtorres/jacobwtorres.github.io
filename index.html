@@ -97,17 +97,20 @@
 			{
 				console.log("Checking for token");
 				// window.location.href = AUTH_URL;
-				dbox_key_value = queryString.searchParams.get("access_token");
-				console.log("Found New token: " + dbox_key_value);
+				access_token = queryString.searchParams.get("access_token");
+				console.log("Found New token: " + access_token);
 				
-				dbox_account_id = queryString.searchParams.get("account_id");
-				console.log("Found New Account ID: " + dbox_account_id);
+				account_id = queryString.searchParams.get("account_id");
+				console.log("Found New Account ID: " + account_id);
 				
-				localStorage.setItem("dbox_token", dbox_key_value);
-				localStorage.setItem("dbox_account_id", dbox_account_id);
-				
-				if(dbox_key_value != null && dbox_account_id != null)
+				if(access_token != null && account_id != null)
 				{			
+					dbox_key_value = access_token;
+					dbox_account_id = account_id;
+					
+					localStorage.setItem("dbox_token", dbox_key_value);
+					localStorage.setItem("dbox_account_id", dbox_account_id);
+					
 					dbox_key_check(function(ret){
 						if(ret == 200)
 						{
