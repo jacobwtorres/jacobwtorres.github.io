@@ -198,7 +198,7 @@
 		    var xhr = new XMLHttpRequest();
 		    xhr.open('POST', 'https://api.dropboxapi.com/2/users/get_account', true);
 		    xhr.setRequestHeader('Authorization', 'Bearer ' + dbox_key_value);
-			hr.setRequestHeader('Content-type', 'application/json');
+			xhr.setRequestHeader('Content-type', 'application/json');
 
 		    xhr.onreadystatechange = function (){
 				console.log("Check" + xhr.status)
