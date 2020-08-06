@@ -66,14 +66,18 @@
 		let current_note_path = "";
 		let already_saved = 0;
 		let full_path_to_write = "";
-
-		let cached_note = 0; //cached note is loaded only if the exact version was never properly loaded to dropbox
-		
-		let bmark_dir_ls = [];
-		let note_dir_ls = [];
-		let note_file_ls = [];
 		
 		var timer;
+		
+		function makeid(length) {
+		   var result           = '';
+		   var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+		   var charactersLength = characters.length;
+		   for ( var i = 0; i < length; i++ ) {
+		      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+		   }
+		   return result;
+		}
 		
 		//every files cache needs metadata about whether we have already prompted the uer
 		//dbox timestamp of last change when we opened it
@@ -172,6 +176,7 @@
 			
 			let di = document.getElementById('di');
 			let ti = document.getElementById('ti');
+			let lo = document.getElementById('log');
 			var timeout = 60000;
 			
 			if(ta.value == "")
@@ -229,6 +234,13 @@
 		{
 			console.log("Save loop init");
 			
+			//are we open with no params?
+			    //immediately redirect to new note with random name
+			
+			
+			cur_file = makeid(32);
+			console.log("cur_file=" + cur_file);
+			
 			//check for open in URL
 			//check for cache of file
 			//if cche, load it, else load main file and create appropriate meta
@@ -258,6 +270,7 @@
 				account_id = queryString.searchParams.get("account_id");
 				console.log("Found New Account ID: " + account_id);
 				
+				//THIS SECTION IS ONLY HIT DURING ACTIVE LOGIN, NOT FOR LOGGED IN STATUS
 				if(access_token != null && account_id != null)
 				{			
 					dbox_key_value = access_token;
@@ -733,7 +746,7 @@
 	<input id="log" type="button" onclick="log()" value="Login to Dropbox">
 	<input type="text" class="form-control"  id="ti" list="user_folders" placeholder="Untitled" value="">
 	<input type="text" class="form-control"  id="di" list="user_folders" placeholder="Folder (optional)" value="" style="display:none;">
-
+	<span id="lia">Logged in as: </span id="un"></span>
 	<!-- <div id="error_op" style="display:none;"></div> -->
 	<div id="error_op"></div>
 	</inline>
