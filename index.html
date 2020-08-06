@@ -49,10 +49,8 @@
 
 <body onload="init()" style="overflow:hidden;" bgcolor="#333">
     <script>
-		let THISURL = 'https://jacobwtorres.github.io/'
-		let page_url = "";
-		let page_name = "";
-
+		let THISURL = location.protocol + '//' + location.host + location.pathname;//'https://jacobwtorres.github.io/'
+		console.log(location.protocol + '//' + location.host + location.pathname)
 		let dbox_key_value = '';	
 		let dbox_account_id = '';	
 		let CLIENT_ID = 'p4p60gowtlk2vl9';
@@ -185,11 +183,16 @@
 				return;
 			}
 			
+			//TODO name change detect and reload page without recalling this function
+			
 			console.log("Cache now!!!");
 			
 			if(lo.value == "Logout")
 			{
 				//we are logged in, use remote cache
+				// cache_current_file({
+					
+				// });
 			}
 			else
 			{
@@ -202,6 +205,18 @@
 			
 			clearTimeout(timer);
 			timer = setTimeout(save_loop, timeout);
+		}
+		
+		function reload_site_as(site)
+		{
+			save_loop();
+			window.location.href = site;
+		}
+		
+		function open_new_site_as(url)
+		{
+		    var win = window.open(url, '_blank');
+		    win.focus();
 		}
 		
 		function erase()
@@ -229,17 +244,35 @@
 		//     return 'Sure?';
 		// };
 		
+		function getJSONP(url, success) {
+
+		    var ud = '_' + +new Date,
+		        script = document.createElement('script'),
+		        head = document.getElementsByTagName('head')[0] 
+		               || document.documentElement;
+
+		    window[ud] = function(data) {
+		        head.removeChild(script);
+		        success && success(data);
+		    };
+
+		    script.src = url.replace('callback=?', 'callback=' + ud);
+		    head.appendChild(script);
+
+		}
+		
 		// document.onload = function()
 		function init()
 		{
 			console.log("Save loop init");
+		
+
+			// getJSONP('http://soundcloud.com/oembed?url=http%3A//soundcloud.com/forss/flickermood&format=js&callback=?', function(data){
+			//     console.log(data);
+			// });  
 			
 			//are we open with no params?
 			    //immediately redirect to new note with random name
-			
-			
-			cur_file = makeid(32);
-			console.log("cur_file=" + cur_file);
 			
 			//check for open in URL
 			//check for cache of file
@@ -254,8 +287,10 @@
 			ta.value = window.localStorage.getItem("ta.value")
 			ti.value = window.localStorage.getItem("ti.value")
 			di.value = window.localStorage.getItem("di.value")
+			
+			
 		
-			save_loop();
+			// save_loop();
 			
 			var queryString = new URL(window.location.href.replace(/#/g,"?"));
 			console.log("queryString= " + queryString);
@@ -270,6 +305,12 @@
 				account_id = queryString.searchParams.get("account_id");
 				console.log("Found New Account ID: " + account_id);
 				
+				open_file = queryString.searchParams.get("open");
+				console.log("Found Open file: " + open_file);
+				
+				recover_file = queryString.searchParams.get("recover");
+				console.log("Found Recover file: " + recover_file);
+
 				//THIS SECTION IS ONLY HIT DURING ACTIVE LOGIN, NOT FOR LOGGED IN STATUS
 				if(access_token != null && account_id != null)
 				{			
@@ -287,7 +328,7 @@
 							// localStorage.setItem("dbox_account_id", dbox_account_id);
 							// dbox_create_folder(BMARK_PATH); //these might not ever get hit
 							// dbox_create_folder(NOTE_PATH);
-							window.location.href = THISURL;
+							reload_site_as(THISURL);
 						}
 						else
 						{
@@ -295,12 +336,24 @@
 							alert(	"We're sorry, but that Login to Dropbox failed. The token returned to us did not check out. To be safe we are logging you out of all accounts.");
 							localStorage.removeItem("dbox_token");
 							localStorage.removeItem("dbox_account_id");
-							window.location.href = THISURL;
+							reload_site_as(THISURL);
 						}
 					
 					})
 	
 					return;
+				}
+				else if(open_file != null)
+				{
+					
+				}
+				else if(recover_file != null)
+				{
+					
+				}
+				else
+				{
+					reload_site_as(THISURL+"?open=.Untitled_"+makeid(9));
 				}
 			}
 			
@@ -336,7 +389,12 @@
 						pu.style.display = "inline";
 						pu.style.visibility = 'visible';
 						lo.value = "Logout";
-						dbox_create_folder(BMARK_PATH);
+						dbox_create_folder(BMARK_PATH, function(ret){
+							if(ret != 200)
+							{
+								console.log("error creating" + BMARK_PATH)
+							}
+						});
 						dbox_create_folder(NOTE_PATH);
 						dbox_create_folder(INTERNAL_PATH);
 					}
@@ -397,7 +455,7 @@
 		    xhr.send(data);
 		}
 
-		function dbox_create_folder(path)
+		function dbox_create_folder(path, callback)
 		{
 		    var xhr = new XMLHttpRequest();
 		    xhr.open('POST', 'https://api.dropboxapi.com/2/files/create_folder_v2', true);
