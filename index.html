@@ -232,45 +232,16 @@
 			}
 		}
 		
-		// window.onbeforeunload = function (e) {
-		//     e = e || window.event;
-		//
-		//     // For IE and Firefox prior to version 4
-		//     if (e) {
-		//         e.returnValue = 'Sure?';
-		//     }
-		//
-		//     // For Safari
-		//     return 'Sure?';
-		// };
-		
-		function getJSONP(url, success) {
-
-		    var ud = '_' + +new Date,
-		        script = document.createElement('script'),
-		        head = document.getElementsByTagName('head')[0] 
-		               || document.documentElement;
-
-		    window[ud] = function(data) {
-		        head.removeChild(script);
-		        success && success(data);
-		    };
-
-		    script.src = url.replace('callback=?', 'callback=' + ud);
-		    head.appendChild(script);
-
-		}
-		
 		// document.onload = function()
 		function init()
 		{
 			console.log("Save loop init");
 		
-
-			// getJSONP('http://soundcloud.com/oembed?url=http%3A//soundcloud.com/forss/flickermood&format=js&callback=?', function(data){
-			//     console.log(data);
-			// });  
-			
+			fetch('http://soundcloud.com/oembed?url=http%3A//soundcloud.com/forss/flickermood&format=json&callback=')
+				.then(response => response.json())
+				.then(data => console.log(data))
+				
+				
 			//are we open with no params?
 			    //immediately redirect to new note with random name
 			
@@ -307,9 +278,6 @@
 				
 				open_file = queryString.searchParams.get("open");
 				console.log("Found Open file: " + open_file);
-				
-				recover_file = queryString.searchParams.get("recover");
-				console.log("Found Recover file: " + recover_file);
 
 				//THIS SECTION IS ONLY HIT DURING ACTIVE LOGIN, NOT FOR LOGGED IN STATUS
 				if(access_token != null && account_id != null)
@@ -345,10 +313,13 @@
 				}
 				else if(open_file != null)
 				{
-					
-				}
-				else if(recover_file != null)
-				{
+					ti.value = open_file;
+					//TODO if only exists in cache, load cache
+					//if exists in both remote/local, load whichever has more recent timestamp
+					//if only exists in the remote, load remote
+					//if exists in neither, check if it exists in external dbox directory
+					//if only exists in extern dbox, load it and mark the caches with metadata indicating when we branched from mainline (so that we can alert to overwriting saves)
+					//if nothing found, just create it as a new file in remote cache and alert to any name conflicts upon saving
 					
 				}
 				else
