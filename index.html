@@ -77,6 +77,8 @@
 		   return result;
 		}
 		
+		//add ability to share file with other user in realtime. Is this possible w/o dropbox?
+		
 		//every files cache needs metadata about whether we have already prompted the uer
 		//dbox timestamp of last change when we opened it
 		//already prompted to reopen with no?
@@ -167,7 +169,11 @@
 		//create all necessary folder names!!
 		
 		//we want to also cache things locally right??? Data saved at any cost
-		
+	    window.onbeforeunload = function(e) {
+			console.log("Do other stuff");
+			alert("DO tis now!");
+	       return 'This tab will reopen the next time if you do not ';
+	    };
 		
 		function save_loop()
 		{			
@@ -236,10 +242,6 @@
 		function init()
 		{
 			console.log("Save loop init");
-		
-			fetch('http://soundcloud.com/oembed?url=http%3A//soundcloud.com/forss/flickermood&format=json&callback=')
-				.then(response => response.json())
-				.then(data => console.log(data))
 				
 				
 			//are we open with no params?
@@ -254,6 +256,8 @@
 					
 			let di = document.getElementById('di');
 			let ti = document.getElementById('ti');
+			let lo = document.getElementById('log');
+			
 			
 			ta.value = window.localStorage.getItem("ta.value")
 			ti.value = window.localStorage.getItem("ti.value")
@@ -314,13 +318,6 @@
 				else if(open_file != null)
 				{
 					ti.value = open_file;
-					//TODO if only exists in cache, load cache
-					//if exists in both remote/local, load whichever has more recent timestamp
-					//if only exists in the remote, load remote
-					//if exists in neither, check if it exists in external dbox directory
-					//if only exists in extern dbox, load it and mark the caches with metadata indicating when we branched from mainline (so that we can alert to overwriting saves)
-					//if nothing found, just create it as a new file in remote cache and alert to any name conflicts upon saving
-					
 				}
 				else
 				{
@@ -380,8 +377,21 @@
 					
 				})
 			}
+			
+			//LOAD FILE TO TEXT AREA
+			//TODO if only exists in cache, load cache
+			//if exists in both remote/local, load whichever has more recent timestamp
+			//if only exists in the remote, load remote
+			//if exists in neither, check if it exists in external dbox directory
+			//if only exists in extern dbox, load it and mark the caches with metadata indicating when we branched from mainline (so that we can alert to overwriting saves)
+			//if nothing found, just create it as a new file in remote cache and alert to any name conflicts upon saving
 		
-
+			if(lo.value == "Logout")
+			{
+				//dbox_does_file_exist(remote_cache)
+				//does_does_file_exist(remote_main)
+				//check timestamps on all files to if 
+			}
 		
 		}
 		
@@ -399,6 +409,26 @@
 		    }   
 			
 		    xhr.send();
+		}
+		
+		
+		// Example POST method implementation:
+		async function postData(url = '', data = {}) {
+		  // Default options are marked with *
+		  const response = await fetch(url, {
+		    method: 'POST', // *GET, POST, PUT, DELETE, etc.
+		    mode: 'cors', // no-cors, *cors, same-origin
+		    cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+		    credentials: 'same-origin', // include, *same-origin, omit
+		    headers: {
+		      'Content-Type': 'application/json'
+		      // 'Content-Type': 'application/x-www-form-urlencoded',
+		    },
+		    redirect: 'follow', // manual, *follow, error
+		    referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+		    body: JSON.stringify(data) // body data type must match "Content-Type" header
+		  });
+		  return response.json(); // parses JSON response into native JavaScript objects
 		}
 		
 		function dbox_key_check(callback)
@@ -425,6 +455,26 @@
 			
 		    xhr.send(data);
 		}
+		
+		function dbox_key_check(callback)
+		{
+			console.log("Account_id=" + dbox_account_id);
+			
+			dbox_account_id = localStorage.getItem("dbox_account_id");
+			
+			console.log("Account_id=" + dbox_account_id);
+				
+			// fetch('http://soundcloud.com/oembed?url=http%3A//soundcloud.com/forss/flickermood&format=json&callback=')
+			// 	.then(response => response.json())
+			// 	.then(data => console.log(data))
+		
+			postData('https://api.dropboxapi.com/2/users/get_account', { account_id: dbox_account_id })
+			  .then(data => {
+			    console.log(data); // JSON data parsed by `data.json()` call
+				
+			  });
+		  
+	  	}
 
 		function dbox_create_folder(path, callback)
 		{
