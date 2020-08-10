@@ -74,7 +74,7 @@
 		var open_file = '';
 		var file_list = [];
 		
-		var user_warned = false;
+		var user_warned = false;		
 		
 		function makeid(length) {
 		   var result           = '';
@@ -882,25 +882,22 @@
               ta.onchange  = function(ev){console.log("change"); save_loop();};
               ta.onkeypress  = function(ev){console.log("keypress");};
 			  ta.onkeydown = function(e)
-			  {
-				  let ch = document.getElementById('ch');
-				  
-		          if (e.keyCode === 9 && ch.checked) { // tab was pressed
+			  {				  
+		  	  	  let tab = document.getElementById('tab');
+		          if (e.keyCode === 9 && tab.checked) { // tab was pressed
+			              // get caret position/selection
+			              var val = this.value,
+			                  start = this.selectionStart,
+			                  end = this.selectionEnd;
 
-		              // get caret position/selection
-		              var val = this.value,
-		                  start = this.selectionStart,
-		                  end = this.selectionEnd;
+			              // set textarea value to: text before caret + tab + text after caret
+			              this.value = val.substring(0, start) + "    " + val.substring(end);
 
-		              // set textarea value to: text before caret + tab + text after caret
-		              this.value = val.substring(0, start) + '\t' + val.substring(end);
+			              // put caret at right position again
+			              this.selectionStart = this.selectionEnd = start + 4;
 
-		              // put caret at right position again
-		              this.selectionStart =let lo = document.getElementById('log'); this.selectionEnd = start + 1;
-
-		              // prevent the focus lose
-		              return false;
-
+			              // prevent the focus lose
+			              return false;
 		          }
 			  };
 
@@ -1161,12 +1158,12 @@
 	<label for="ch"> Reopen after closing</label>
 	
 	<br>
-	<input id="ch" type="checkbox" name="ch">
-	<label for="ch"> Alert Dropbox of changes</label>
+	<input id="alert" type="checkbox">
+	<label for="alert"> Alert Dropbox of changes</label>
 	
 	<br>
-	<input id="ch" type="checkbox" name="ch" checked>
-	<label for="ch"> Enable tabbing within text area</label>
+	<input id="tab" type="checkbox" checked>
+	<label for="tab"> Enable tabbing within text area</label>
 	
 	<br><br>
 	<label for="erase"> Debug tools:</label>
