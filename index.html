@@ -66,6 +66,8 @@
 		let full_path_to_write = "";
 		
 		var timer;
+		var keypress_timer;
+		var keypress_timeout = 10000;
 		
 		let hard_coded_login = false;
 		let h_dbox_key_value = '4neAoDtRLnAAAAAAAAAs0t_ARx40cVXefKgo3B95N6H2W135ZySpOHvPJMlxNPN_';	
@@ -254,7 +256,7 @@
 		
 		function open_new_file()
 		{
-			open_new_site_as(THISURL+"?open=_Untitled_"+makeid(9));
+			open_new_site_as(THISURL+"?open=Untitled_"+makeid(9));
 		}
 		
 		//TODO this currently warns the user that their data is about to be deleted, then STILL deletes it after they opt to preserve
@@ -311,6 +313,18 @@
 			}
 	        return;
 	    };
+		
+		function save_looop()
+		{
+			console.log("keypress save")
+			save_loop();
+		}
+		function keypress_timer_kick()
+		{
+			console.log("kick")
+			clearTimeout(keypress_timer);
+			keypress_timer = setTimeout(save_looop, keypress_timeout /*ms*/);
+		}
 		
 		function save_loop(cmd)
 		{			
@@ -535,7 +549,7 @@
 					}
 					else
 					{
-						reload_site_as(THISURL+"?open=_Untitled_"+makeid(9));
+						reload_site_as(THISURL+"?open=Untitled_"+makeid(9));
 					}
 				}
 			}
@@ -724,7 +738,7 @@
 		    var xhr = new XMLHttpRequest();
 		    xhr.open('POST', 'https://api.dropboxapi.com/2/files/move_v2', true);
 		    xhr.setRequestHeader('Authorization', 'Bearer ' + dbox_key_value);
-		    xhr.setRequestHeader('Dropbox-API-Arg', JSON.stringify({"from_path":from, "to_path":to, "autorename":false, "allow_shared_folder":false, "allow_ownership_transfer":false}));
+		    // xhr.setRequestHeader('Dropbox-API-Arg', JSON.stringify({"from_path":from, "to_path":to, "autorename":false, "allow_shared_folder":false, "allow_ownership_transfer":false}));
 
 		    xhr.onreadystatechange = function ()
 			{
@@ -733,8 +747,10 @@
 					callback(xhr.responseText)
 		        }
 		    }
+			
+		    var data = JSON.stringify({"from_path":from, "to_path":to, "autorename":false, "allow_shared_folder":false, "allow_ownership_transfer":false});
 
-		    xhr.send();
+		    xhr.send(data);
 		}
 		
 		function dbox_key_check(callback)
@@ -786,7 +802,7 @@
 		        if (xhr.readyState == 4) {
 					callback(xhr.status);
 		        }
-		    }  
+		    } 
 
 		    var data = JSON.stringify({"path":path});
 
@@ -888,7 +904,7 @@
               ta.onmousemove  = function(ev){ if (this.mouseisdown) this.paintLineNumbers(); };
 
               ta.onchange  = function(ev){console.log("change"); save_loop();};
-              ta.onkeypress  = function(ev){console.log("keypress");};
+              ta.onkeypress  = function(ev){keypress_timer_kick();};
 			  ta.onkeydown = function(e)
 			  {				  
 		  	  	  let tab = document.getElementById('tab');
