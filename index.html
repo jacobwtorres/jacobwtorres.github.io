@@ -425,21 +425,21 @@
 		//TODO do a full ASCII character check here. This can open us up to attacks.
 		function check_file_name(file)
 		{
-		    if(ti.value == "")
+		    if(file == "")
 		    {
 				alert("File name absent");
-				return -1;
+				return null;
 		    }
   
-		    ti.value = ti.value.replace(/–/g, '-');
+		    file = file.replace(/–/g, '-');
   
-		    if(ti.value.includes('\\') || ti.value.includes('\/'))
+		    if(file.includes('\\') || file.includes('\/'))
 		    {
 		    	alert("Please remove slashes from the name");
-				return -1;
+				return null;
 			}
 			
-			return 0;
+			return file;
 		}
 		
 		// document.onload = function()
@@ -515,13 +515,15 @@
 				}
 				else if(open_file != null)
 				{
-					if(check_file_name(open_file) != 0)
+					nn = check_file_name(open_file);
+					if(nn == null)
 					{
 						open_file = null;
 						reload_site_as(THISURL);
 					}
 					
-					ti.value = open_file;
+					ti.value = nn;
+					open_file = nn;
 					remove_from_list(open_file)
 					console.log("HERE!!!!!!!!!:"+file_list)
 				}
