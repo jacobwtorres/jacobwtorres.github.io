@@ -745,7 +745,8 @@
 			{
 		        if (xhr.readyState == 4)
 				{
-					callback(xhr.responseText)
+					console.log(xhr.responseText)
+					callback(xhr.status)
 		        }
 		    }
 			
@@ -1148,6 +1149,8 @@
 				console.log("Failed name check, aborting");
 				return;
 			}
+			
+			//https://random-word-api.herokuapp.com/word?number=1
 			
 			if(lo.value != "Login")
 			{
