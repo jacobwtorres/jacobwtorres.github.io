@@ -881,6 +881,28 @@
 
               ta.onchange  = function(ev){console.log("change"); save_loop();};
               ta.onkeypress  = function(ev){console.log("keypress");};
+			  ta.onkeydown = function(e)
+			  {
+				  let ch = document.getElementById('ch');
+				  
+		          if (e.keyCode === 9 && ch.checked) { // tab was pressed
+
+		              // get caret position/selection
+		              var val = this.value,
+		                  start = this.selectionStart,
+		                  end = this.selectionEnd;
+
+		              // set textarea value to: text before caret + tab + text after caret
+		              this.value = val.substring(0, start) + '\t' + val.substring(end);
+
+		              // put caret at right position again
+		              this.selectionStart =let lo = document.getElementById('log'); this.selectionEnd = start + 1;
+
+		              // prevent the focus lose
+		              return false;
+
+		          }
+			  };
 
             document.body.appendChild(div);
             // make sure it's painted
@@ -1092,7 +1114,7 @@
 			if(lo.value != "Login")
 			{
 				//TODO kick off rename with dropbox
-				dbox_mv_file(temp_name, ti.value, function()
+				dbox_mv_file(temp_name, ti.value, function(ret)
 				{
 					if(ret == 200)
 					{
@@ -1143,7 +1165,7 @@
 	<label for="ch"> Alert Dropbox of changes</label>
 	
 	<br>
-	<input id="ch" type="checkbox" name="ch">
+	<input id="ch" type="checkbox" name="ch" checked>
 	<label for="ch"> Enable tabbing within text area</label>
 	
 	<br><br>
