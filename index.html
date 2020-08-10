@@ -368,6 +368,11 @@
 			{
 				show_oa();
 				alert("We noticed popups are disabled. Please enable them to open all available files.");
+				win = window.open(url, '_blank');
+				if(win!=null)
+				{
+					win.focus();
+				}
 			}
 			else
 			{
@@ -415,6 +420,26 @@
 				window.localStorage.removeItem("file_list")
 				reload_site_as(THISURL)
 			}
+		}
+		
+		//TODO do a full ASCII character check here. This can open us up to attacks.
+		function check_file_name(file)
+		{
+		    if(ti.value == "")
+		    {
+				alert("File name absent");
+				return -1;
+		    }
+  
+		    ti.value = ti.value.replace(/–/g, '-');
+  
+		    if(ti.value.includes('\\') || ti.value.includes('\/'))
+		    {
+		    	alert("Please remove slashes from the name");
+				return -1;
+			}
+			
+			return 0;
 		}
 		
 		// document.onload = function()
@@ -490,16 +515,21 @@
 				}
 				else if(open_file != null)
 				{
+					if(check_file_name(open_file) != 0)
+					{
+						open_file = null;
+						reload_site_as(THISURL);
+					}
+					
 					ti.value = open_file;
 					remove_from_list(open_file)
 					console.log("HERE!!!!!!!!!:"+file_list)
-					//TODO name check must occur here, not upon saving! Saving must be guaranteed once we start
 				}
 				else
 				{						
 					if(does_list_exist())
 					{
-						open_all_tabs()
+						open_all_tabs(true)
 					}
 					else
 					{
@@ -615,9 +645,7 @@
 			
 			un.style.display = "inline";
 			un.style.visibility = 'visible';
-		    
-			console.log("Key worked");
-			
+		    			
 			pu.style.display = "inline";
 			pu.style.visibility = 'visible';
 			lo.value = "Logout";
@@ -874,11 +902,11 @@
 			let ti = document.getElementById('ti');
 			let error_output = document.getElementById('error_op');
 						
-		    if(ta.value == "")
-		    {
-				ta.placeholder = "Enter some text here before saving!";
-			  	return;
-		    }
+				// 		    if(ta.value == "")
+				// 		    {
+				// ta.placeholder = "Enter some text here before saving!";
+				// 			  	return;
+				// 		    }
 	
 		    if(ti.value == "")
 		    {
