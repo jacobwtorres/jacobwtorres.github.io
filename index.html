@@ -368,11 +368,6 @@
 			{
 				show_oa();
 				alert("We noticed popups are disabled. Please enable them to open all available files.");
-				win = window.open(url, '_blank');
-				if(win!=null)
-				{
-					win.focus();
-				}
 			}
 			else
 			{
@@ -943,7 +938,7 @@
 				}
 				else
 				{
-					alert("Failed. Data not backed up.");
+					alert("Remote backup failed");
 					auth_failure_handle()
 				}
 			});
