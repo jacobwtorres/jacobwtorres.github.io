@@ -1009,11 +1009,13 @@
 			dbox_create_file(construct_file_path(), ta.value, /*overwrite*/1, function(ret){
 				if(ret == 200)
 				{
-					alert("Success");
+					// alert("Success");
+					console.log("Remote backup SUCCESS")
 				}
 				else
 				{
-					alert("Remote backup failed");
+					console.log("Remote backup FAIL")
+					// alert("Remote backup failed");
 					auth_failure_handle()
 				}
 			});
@@ -1058,15 +1060,29 @@
 		
 		function inject_timestamp()
 		{
-			// let ta = document.getElementById('ta');
-			if(ta.value)
+			let unix = document.getElementById('unix');
+			var dateString = ''
+			var newDate = new Date();
+			
+			if(unix.checked)
 			{
-				ta.value = ta.value + '\n' +'[' + Date.now() + ']'
+				dateString = Date.now()
 			}
 			else
 			{
-				ta.value = '[' + Date.now() + ']'
+				dateString = newDate.toUTCString();
 			}
+			
+			if(ta.value)
+			{
+				ta.value = ta.value + '\n' +'[' + dateString + '] '
+			}
+			else
+			{
+				ta.value = '[' + dateString + '] '
+			}
+			
+			ta.focus();
 		}
 		
 		function mv()
@@ -1172,6 +1188,10 @@
 	<br>
 	<input id="tab" type="checkbox" checked>
 	<label for="tab"> Enable tabbing within text area</label>
+	
+	<br>
+	<input id="unix" type="checkbox">
+	<label for="unix"> Unix timestamps</label>
 	
 	<br><br>
 	<label for="erase"> Debug tools:</label>
