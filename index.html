@@ -223,10 +223,10 @@
 			}
 		}
 		
-		function open_all_tabs()
+		function open_all_tabs(use_current_tab)
 		{				
 			for (index = 0; index < file_list.length; index++) {
-				if(index == file_list.length-1)
+				if((index == file_list.length-1) && use_current_tab == true)
 				{
 					reload_site_as(THISURL+'?open='+file_list[index])
 					console.log("reload as: " + THISURL+'?open='+file_list[index])
@@ -366,12 +366,38 @@
 			
 			if(win == null)
 			{
+				show_oa();
 				alert("We noticed popups are disabled. Please enable them to open all available files.");
+				win = window.open(url, '_blank');
+				if(win!=null)
+				{
+					win.focus();
+				}
 			}
 			else
 			{
 		    	win.focus();
 			}
+		}
+		
+		function show_oa()
+		{
+			let oa = document.getElementById('oa');
+			oa.style.display = "inline";
+			oa.style.visibility = 'visible';
+		}
+		
+		function hide_oa()
+		{
+			let oa = document.getElementById('oa');
+			oa.style.display = "none";
+			oa.style.visibility = 'hidden';
+		}
+		
+		function open_all_cached_files()
+		{
+			open_all_tabs(false);
+			hide_oa();
 		}
 		
 		//TODO try to reauth without disturbing user
@@ -1023,6 +1049,7 @@
     <!-- <button onclick="pull()">Pull Before</button>
 	<button onclick="pull()">Pull After</button> -->
 	<input id="push" type="button" onclick="note_save_handler()" value="Push">
+	<input id="oa" type="button" onclick="open_all_cached_files()" value="Open All Cached Files" style="display:none;">
 	<input id="ts" type="button" onclick="inject_timestamp()" value="Timestamp">
 	
 	<input id="new" type="button" onclick="open_new_file()" value="New File">
@@ -1043,6 +1070,10 @@
 	<br>
 	<input id="ch" type="checkbox" name="ch">
 	<label for="ch"> Alert Dropbox of changes</label>
+	
+	<br>
+	<input id="ch" type="checkbox" name="ch">
+	<label for="ch"> Enable tabbing within text area</label>
 	
 	<br><br>
 	<label for="erase"> Debug tools:</label>
