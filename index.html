@@ -336,7 +336,7 @@
 			keypress_timer = setTimeout(save_looop, keypress_timeout /*ms*/);
 		}
 		
-		function save_loop(cmd)
+		function save_loop(cmd, callback)
 		{			
 			
 			let di = document.getElementById('di');
@@ -349,6 +349,11 @@
 			if(ta.value == "")
 			{
 				console.log("Skip cache. Empty");
+				
+				if(callback)
+				{
+					callback(200);
+				}
 				return;
 			}			
 			
@@ -365,7 +370,12 @@
 				//if timestamp does not exist 
 				
 				//check for file locks as well in case another browser opened and opted to lock this one. Prompt user quickly and say editing here is now disabled.
-				note_save_handler();
+				note_save_handler(function(ret){
+					if(callback)
+					{
+						callback(ret)
+					}
+				});
 			}
 			
 			clearTimeout(timer);
@@ -976,7 +986,7 @@
 		    xhr.send(bin);
 		}
 
-		function note_save_handler()
+		function note_save_handler(callback)
 		{
 			let di = document.getElementById('di');
 			let ti = document.getElementById('ti');
@@ -1040,6 +1050,12 @@
 	
 
 			dbox_create_file(construct_file_path(), ta.value, /*overwrite*/1, function(ret){
+				
+				if(callback)
+				{
+					callback(ret);
+				}
+				
 				if(ret == 200)
 				{
 					// alert("Success");
@@ -1167,7 +1183,7 @@
 						
 			if(lo.value == "Logout")
 			{
-				save_loop(function(re){
+				save_loop('', function(re){
 					
 					if(re == 200)
 					{
