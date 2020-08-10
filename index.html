@@ -639,7 +639,7 @@
 				{
 					if(xhr.status == 200)
 					{
-						callback(xhr.status);
+						callback(xhr.responseText);
 					}
 					else
 					{
@@ -844,10 +844,6 @@
 			let di = document.getElementById('di');
 			let ti = document.getElementById('ti');
 			let error_output = document.getElementById('error_op');
-			
-			console.log(di.value);
-			console.log(ti.value);
-			console.log(ta.value);
 						
 		    if(ta.value == "")
 		    {
