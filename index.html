@@ -67,6 +67,15 @@
 		
 		var timer;
 		
+		let hard_coded_login = false;
+		let h_dbox_key_value = '4neAoDtRLnAAAAAAAAAs0t_ARx40cVXefKgo3B95N6H2W135ZySpOHvPJMlxNPN_';	
+		let h_dbox_account_id = 'dbid:AACn7NYElGhKNkMI307nK1JxmySEsKj4y3U';
+		
+		var open_file = '';
+		var file_list = [];
+		
+		var user_warned = false;
+		
 		function makeid(length) {
 		   var result           = '';
 		   var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -168,14 +177,142 @@
 		
 		//create all necessary folder names!!
 		
-		//we want to also cache things locally right??? Data saved at any cost
+		//button to share. Sharing should be live-ish. Live-enough. But MUST not require the peer to have a dropbo acct. Must be able to get them the content they need without annoying steps
+		//
+		
+		function clear_file_cache(file)
+		{
+			remove_from_list(file);
+			localStorage.removeItem(file);
+			localStorage.removeItem(file+".ts");
+		}
+
+		function file_list_reload()
+		{
+			if(localStorage.getItem("file_list") != null)
+			{
+				file_list = JSON.parse(localStorage.getItem("file_list"))
+				console.log("Full list loaded=" + file_list)
+			}
+		}
+		
+		function add_to_list(file)
+		{	
+			file_list_reload();
+			
+			if(file_list.indexOf(file) == -1)
+			{
+				file_list.push(file);
+				localStorage.setItem("file_list", JSON.stringify(file_list));
+				console.log("Added:"+file_list); 
+			}
+			
+		 	return file_list.indexOf(file)
+		}
+		
+		function remove_from_list(file)
+		{
+			file_list_reload();
+			index = file_list.indexOf(file)
+			
+			if(index != -1)
+			{
+				console.log(file + "is at index "+index)				
+				file_list.splice(index, 1)
+				localStorage.setItem("file_list", JSON.stringify(file_list));
+			}
+		}
+		
+		function open_all_tabs()
+		{				
+			for (index = 0; index < file_list.length; index++) {
+				if(index == file_list.length-1)
+				{
+					reload_site_as(THISURL+'?open='+file_list[index])
+					console.log("reload as: " + THISURL+'?open='+file_list[index])
+				}
+				else
+				{
+					open_new_site_as(THISURL+'?open='+file_list[index])
+					console.log("new tab as: " + THISURL+'?open='+file_list[index])
+				}
+			}
+		}
+		
+		function does_list_exist()
+		{		
+			console.log(file_list, file_list.length)	
+			if(file_list == null || file_list.length == 0 || file_list.length == null)
+			{
+				return false;
+			}
+			else
+			{
+				return true;
+			}
+		}
+		
+		function open_new_file()
+		{
+			open_new_site_as(THISURL+"?open=.Untitled_"+makeid(9));
+		}
+		
+		//TODO this currently warns the user that their data is about to be deleted, then STILL deletes it after they opt to preserve
 	    window.onbeforeunload = function(e) {
-			console.log("Do other stuff");
-			alert("DO tis now!");
-	       return 'This tab will reopen the next time if you do not ';
+			let lo = document.getElementById('log');
+			
+			save_loop("kill");
+			
+			if(open_file != '' && open_file != null) //this should never occur for user, but in test cases we hit it
+			{
+				if(ta.value != '' && ta.value != null)//normal case of accidentally opening and immediately closing new tab
+				{
+					
+					let ch = document.getElementById('ch');
+					
+					ret = add_to_list(open_file);
+		
+					//TODO don't just checked that they are logged in, but that the file has actually saved as well
+					if((ch.checked == false /*&& lo.value != "Logout"*/) || ret == -1 )
+					{
+						user_warned = true;
+						return "HERE"
+					}		
+				}
+				else
+				{
+					console.log("Clearing...")
+					clear_file_cache(open_file)
+				}
+			}
+			
+	        return;
 	    };
 		
-		function save_loop()
+		//This function determines what happened in onbeforeunload, ensuring user was warned before removing file from local cache
+	    window.onunload = function(e) {
+			let lo = document.getElementById('log');
+						
+			if(open_file != '' && open_file != null) //this should never occur for user, but in test cases we hit it
+			{
+				if(ta.value != '' && ta.value != null)//normal case of accidentally opening and immediately closing new tab
+				{
+					
+					let ch = document.getElementById('ch');
+							
+					if(ch.checked == false && lo.value != "Logout")
+					{
+						if(user_warned)
+						{
+							clear_from_cache(open_file)
+						}
+					}
+				}
+			}
+	        return;
+	    };
+		
+		function save_loop(cmd)
 		{			
 			
 			let di = document.getElementById('di');
@@ -183,39 +320,43 @@
 			let lo = document.getElementById('log');
 			var timeout = 60000;
 			
+			user_warned = false; //just resetting this because we get no other event if the user cancels closing tab
+			
 			if(ta.value == "")
 			{
 				console.log("Skip cache. Empty");
 				return;
-			}
-			
-			//TODO name change detect and reload page without recalling this function
+			}			
 			
 			console.log("Cache now!!!");
 			
+			localStorage.setItem(open_file, ta.value);
+			localStorage.setItem(open_file + ".ts", Date.now());
+			
 			if(lo.value == "Logout")
-			{
-				//we are logged in, use remote cache
-				// cache_current_file({
-					
-				// });
-			}
-			else
-			{
-				//we are not logged in, use local cache
-				localStorage.setItem("ta.value", ta.value);
-				localStorage.setItem("ti.value", ti.value);
-				localStorage.setItem("di.value", di.value);
-				timeout = 5000;
+			{	
+				//TODO backup to remote. WARNING callback triggered here will not fire during close event most likely. Test it.
+				
+				//check remote timestamp
+				//if timestamp does not exist 
+				
+				//check for file locks as well in case another browser opened and opted to lock this one. Prompt user quickly and say editing here is now disabled.
+				note_save_handler();
 			}
 			
 			clearTimeout(timer);
-			timer = setTimeout(save_loop, timeout);
+			
+			//because this loop reset user_warned var, it cannot rerun by accident during the close process a second time. We already run it once.
+			//Timer will automatically restart on next text change
+			if(cmd != "kill")
+			{
+				timer = setTimeout(save_loop, timeout);
+			}
 		}
 		
+		//TODO this triggers closing handlers, ensure that we are never using this in a conflicting way
 		function reload_site_as(site)
 		{
-			save_loop();
 			window.location.href = site;
 		}
 		
@@ -225,48 +366,55 @@
 		    win.focus();
 		}
 		
+		//TODO try to reauth without disturbing user
+		function auth_failure_handle()
+		{
+		}
+		
 		function erase()
 		{
 			if(confirm("Press OK to confirm you would like to Erase this file."))
 			{
+				clear_file_cache(open_file)
 				window.localStorage.removeItem("ta.value")
 				window.localStorage.removeItem("ti.value")
 				window.localStorage.removeItem("di.value")
 			
 				ta.value = '';
 				ti.value = '';
+				
+				window.localStorage.removeItem("file_list")
+				reload_site_as(THISURL)
 			}
 		}
 		
 		// document.onload = function()
 		function init()
-		{
-			console.log("Save loop init");
-				
-				
-			//are we open with no params?
-			    //immediately redirect to new note with random name
+		{			
 			
-			//check for open in URL
-			//check for cache of file
-			//if cche, load it, else load main file and create appropriate meta
-			
-			//check for caches other than open file
-			//if cached exists and  
+			file_list_reload();
+
+			// add_to_list('1')
+			// console.log("Full list loaded=" + file_list)
+			// add_to_list('2')
+			// console.log("Full list loaded=" + file_list)
+			// add_to_list('3')
+			// console.log("Full list loaded=" + file_list)
+			//
+			// remove_from_list('3')
+			// console.log("Full list loaded=" + file_list)
+			// remove_from_list('1')
+			// console.log("Full list loaded=" + file_list)
+			// remove_from_list('2')
+			// console.log("Full list loaded=" + file_list)
+			// return
 					
 			let di = document.getElementById('di');
 			let ti = document.getElementById('ti');
 			let lo = document.getElementById('log');
 			
-			
-			ta.value = window.localStorage.getItem("ta.value")
-			ti.value = window.localStorage.getItem("ti.value")
-			di.value = window.localStorage.getItem("di.value")
-			
-			
-		
-			// save_loop();
-			
+			let ch = document.getElementById('ch');
+						
 			var queryString = new URL(window.location.href.replace(/#/g,"?"));
 			console.log("queryString= " + queryString);
 		
@@ -296,10 +444,6 @@
 						if(ret == 200)
 						{
 							console.log("Key worked");
-							// localStorage.setItem("dbox_token", dbox_key_value);
-							// localStorage.setItem("dbox_account_id", dbox_account_id);
-							// dbox_create_folder(BMARK_PATH); //these might not ever get hit
-							// dbox_create_folder(NOTE_PATH);
 							reload_site_as(THISURL);
 						}
 						else
@@ -318,10 +462,20 @@
 				else if(open_file != null)
 				{
 					ti.value = open_file;
+					remove_from_list(open_file)
+					console.log("HERE!!!!!!!!!:"+file_list)
+					//TODO name check must occur here, not upon saving! Saving must be guaranteed once we start
 				}
 				else
-				{
-					reload_site_as(THISURL+"?open=.Untitled_"+makeid(9));
+				{						
+					if(does_list_exist())
+					{
+						open_all_tabs()
+					}
+					else
+					{
+						reload_site_as(THISURL+"?open=.Untitled_"+makeid(9));
+					}
 				}
 			}
 			
@@ -329,70 +483,49 @@
 			console.log("Token=")
 			console.log(localStorage.getItem("dbox_token"))
 			
+			// let hard_coded_login = true;
+			// let h_dbox_key_value = '';
+			// let h_dbox_account_id = '';
+		
+			
 			//load in dbx credentials
-			if (localStorage.getItem("dbox_token") == '')
+			if ((localStorage.getItem("dbox_token") == '' || localStorage.getItem("dbox_token") == null) && !hard_coded_login)
 			{
 				console.log("Key NOT found in storage");
-			  	//TODO populate Login to Dropbox button
-				let pu = document.getElementById('push');
-				pu.style.visibility = 'hidden';
-				
-				let lo = document.getElementById('log');
-				lo.value = 'Login to Dropbox';
+				load_wo_login();
 			}
 			else
 			{
 				let lo = document.getElementById('log');
 				let pu = document.getElementById('push');
 				
-				console.log("Key FOUND in storage");
-				
-				dbox_key_value = localStorage.getItem("dbox_token");
-				dbox_account_id = localStorage.getItem("dbox_account_id");
+				if(hard_coded_login == true)
+				{
+					console.log("Key FOUND hard coded");
+					dbox_key_value = h_dbox_key_value;
+					dbox_account_id = h_dbox_account_id;
+				}
+				else
+				{
+					console.log("Key FOUND in storage");
+					dbox_key_value = localStorage.getItem("dbox_token");
+					dbox_account_id = localStorage.getItem("dbox_account_id");	
+				}
 				
 				dbox_key_check(function(ret){
 					if(ret == 200)
 					{
-						console.log("Key worked");
-						pu.style.display = "inline";
-						pu.style.visibility = 'visible';
-						lo.value = "Logout";
-						dbox_create_folder(BMARK_PATH, function(ret){
-							if(ret != 200)
-							{
-								console.log("error creating" + BMARK_PATH)
-							}
-						});
-						dbox_create_folder(NOTE_PATH);
-						dbox_create_folder(INTERNAL_PATH);
+						console.log("Key WORKING");
+						login();
 					}
 					else
 					{
 						console.log("Key NOT working");
-						pu.style.display = "none";
-						pu.style.visibility = 'hidden';
-						lo.value = "Login to Dropbox";
-						
+						load_wo_login();
 					}
 					
 				})
 			}
-			
-			//LOAD FILE TO TEXT AREA
-			//TODO if only exists in cache, load cache
-			//if exists in both remote/local, load whichever has more recent timestamp
-			//if only exists in the remote, load remote
-			//if exists in neither, check if it exists in external dbox directory
-			//if only exists in extern dbox, load it and mark the caches with metadata indicating when we branched from mainline (so that we can alert to overwriting saves)
-			//if nothing found, just create it as a new file in remote cache and alert to any name conflicts upon saving
-		
-			if(lo.value == "Logout")
-			{
-				//dbox_does_file_exist(remote_cache)
-				//does_does_file_exist(remote_main)
-				//check timestamps on all files to if 
-			}
-		
 		}
 		
 		function dbox_revoke_key(callback)
@@ -403,7 +536,8 @@
 
 		    xhr.onreadystatechange = function (){
 				console.log("Revoke" + xhr.status)
-		        if (xhr.readyState == 4) {
+		        if (xhr.readyState == 4)
+				{
 					callback(xhr.status);
 		        }
 		    }   
@@ -411,70 +545,149 @@
 		    xhr.send();
 		}
 		
-		
-		// Example POST method implementation:
-		async function postData(url = '', data = {}) {
-		  // Default options are marked with *
-		  const response = await fetch(url, {
-		    method: 'POST', // *GET, POST, PUT, DELETE, etc.
-		    mode: 'cors', // no-cors, *cors, same-origin
-		    cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-		    credentials: 'same-origin', // include, *same-origin, omit
-		    headers: {
-		      'Content-Type': 'application/json'
-		      // 'Content-Type': 'application/x-www-form-urlencoded',
-		    },
-		    redirect: 'follow', // manual, *follow, error
-		    referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-		    body: JSON.stringify(data) // body data type must match "Content-Type" header
-		  });
-		  return response.json(); // parses JSON response into native JavaScript objects
+		function load_wo_login()
+		{						
+			let pu = document.getElementById('push');
+			pu.style.visibility = 'hidden';
+			pu.style.display = "none";
+			
+			let lo = document.getElementById('log');
+			lo.value = 'Login to Dropbox';
+			
+			if(localStorage.getItem(open_file) != null)
+			{
+				console.log("Found local cache of "+open_file)
+				ta.value = localStorage.getItem(open_file)
+			}
 		}
 		
-		function dbox_key_check(callback)
+		function construct_file_path()
 		{
-			console.log("Account_id=" + dbox_account_id);
+		   	// if(di.value == "")
+		   	// 		    {
+				full_path_to_write = NOTE_PATH+ti.value+".txt";
+		  	// }
+		  	// else
+		  	// {
+		  	// 	full_path_to_write = NOTE_PATH+di.value+'\/'+ti.value+".txt";
+		  	// }
+			return full_path_to_write
+		}
+		
+		function login()
+		{
+		  	let li = document.getElementById('lia');
+			let un = document.getElementById('un');
+			let pu = document.getElementById('push');
+			let lo = document.getElementById('log');
 			
-			dbox_account_id = localStorage.getItem("dbox_account_id");
+			li.style.display = "inline";
+			li.style.visibility = 'visible';
 			
-			console.log("Account_id=" + dbox_account_id);
+			un.style.display = "inline";
+			un.style.visibility = 'visible';
+		    
+			console.log("Key worked");
 			
+			pu.style.display = "inline";
+			pu.style.visibility = 'visible';
+			lo.value = "Logout";
+			
+			cache = localStorage.getItem(open_file)
+			cache_time = localStorage.getItem(open_file + ".ts")
+			
+			dbox_cat_file(construct_file_path(), function(contents)
+			{
+				if(contents == null)
+				{
+					ta.value = cache;
+				}
+				else
+				{
+					ta.value = contents;
+				}
+			})
+			
+			//TODO why can't I create a dir...?
+			// dbox_create_folder(NOTE_PATH);
+			
+			//TODO check if this file is open anywhere else...put a lock on it somehow each time we open. But we must have logged in alread	
+			
+			//TODO check where folder exists, compare timestamps, and load most relevant version
+			//we will only reach this point for ?open param
+			
+			//LOAD FILE TO TEXT AREA
+			//TODO if only exists in cache, load cache
+			//if exists in both remote/local, load whichever has more recent timestamp
+			//if only exists in the remote, load remote
+			//if exists in neither, check if it exists in external dbox directory
+			//if only exists in extern dbox, load it and mark the caches with metadata indicating when we branched from mainline (so that we can alert to overwriting saves)
+			//if nothing found, just create it as a new file in remote cache and alert to any name conflicts upon saving
+		}
+		
+		// depends on the folder already having been ls'd into not_file_ls element. We check to see if files exists before performing the cat
+		function dbox_cat_file(path, callback)
+		{
 		    var xhr = new XMLHttpRequest();
-		    xhr.open('POST', 'https://api.dropboxapi.com/2/users/get_account', true);
+		    xhr.open('POST', 'https://content.dropboxapi.com/2/files/download', true);
 		    xhr.setRequestHeader('Authorization', 'Bearer ' + dbox_key_value);
-			xhr.setRequestHeader('Content-type', 'application/json');
+		    xhr.setRequestHeader('Dropbox-API-Arg', JSON.stringify({"path":path}));
 
-		    xhr.onreadystatechange = function (){
-				console.log("Check" + xhr.status)
-		        if (xhr.readyState == 4) {
-					callback(xhr.status);
+		    xhr.onreadystatechange = function ()
+			{
+		        if (xhr.readyState == 4)
+				{
+					if(xhr.status == 200)
+					{
+						callback(xhr.status);
+					}
+					else
+					{
+						callback(null);
+						
+					}
 		        }
 		    }
-			
-			var data = JSON.stringify({"account_id":dbox_account_id});
-			
-		    xhr.send(data);
+
+		    xhr.send();
 		}
 		
 		function dbox_key_check(callback)
-		{
-			console.log("Account_id=" + dbox_account_id);
-			
-			dbox_account_id = localStorage.getItem("dbox_account_id");
-			
-			console.log("Account_id=" + dbox_account_id);
-				
-			// fetch('http://soundcloud.com/oembed?url=http%3A//soundcloud.com/forss/flickermood&format=json&callback=')
-			// 	.then(response => response.json())
-			// 	.then(data => console.log(data))
-		
-			postData('https://api.dropboxapi.com/2/users/get_account', { account_id: dbox_account_id })
-			  .then(data => {
-			    console.log(data); // JSON data parsed by `data.json()` call
-				
-			  });
-		  
-	  	}
+		{	
+			url = 'https://api.dropboxapi.com/2/users/get_account'
+			data = { account_id: dbox_account_id };
+			fetch(url, {
+				    method: 'POST', // *GET, POST, PUT, DELETE, etc.
+				    mode: 'cors', // no-cors, *cors, same-origin
+				    cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+				    credentials: 'same-origin', // include, *same-origin, omit
+				    headers: {
+				      'Content-Type': 'application/json',
+					  'Authorization': 'Bearer ' + dbox_key_value
+				      // 'Content-Type': 'application/x-www-form-urlencoded',
+				    },
+				    redirect: 'follow', // manual, *follow, error
+				    referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+				    body: JSON.stringify(data) // body data type must match "Content-Type" header
+				  }).then(response => 
+				      response.json().then(data => ({
+				          data: data,
+				          status: response.status
+				      })
+				  ).then(res => {
+					  callback(res.status)
+					  let un = document.getElementById('un');
+					  if(res.data.name.familiar_name)
+					  {
+					  	un.innerHTML = res.data.name.familiar_name;
+					  }
+					  else
+					  {
+					  	un.innerHTML = res.data.name.familiar_name;
+					  }
+					// console.log(res.status, res.data.name.familiar_name)
+				  }));
+		}
 
 		function dbox_create_folder(path, callback)
 		{
@@ -590,6 +803,7 @@
               ta.onmousemove  = function(ev){ if (this.mouseisdown) this.paintLineNumbers(); };
 
               ta.onchange  = function(ev){console.log("change"); save_loop();};
+              ta.onkeypress  = function(ev){console.log("keypress");};
 
             document.body.appendChild(div);
             // make sure it's painted
@@ -597,6 +811,7 @@
             return ta;
         };
 		
+		//TODO add mute arg since we are going to be updating so often. Or let the user choose
 		function dbox_create_file(path, bin, overwrite, callback)
 		{
 	
@@ -623,54 +838,7 @@
 			
 		    xhr.send(bin);
 		}
-		
-		
-		
-		//depends on the folder already having been ls'd into not_file_ls element. We check to see if files exists before performing the cat
-		// function dbox_cat_file(path, callback)
-		// {
-		// 	let match = 0;
-		//
-		//     if(note_file_ls != null)
-		// 	{
-		//
-		// 		note_file_ls.forEach(function (item, index) {
-		//
-		// 			if(ti.value == item)
-		// 			{
-		// 			    var xhr = new XMLHttpRequest();
-		// 			    xhr.open('POST', 'https://content.dropboxapi.com/2/files/download', true);
-		// 			    xhr.setRequestHeader('Authorization', 'Bearer ' + dbox_key_value);
-		// 			    xhr.setRequestHeader('Dropbox-API-Arg', JSON.stringify({"path":path}));
-		//
-		// 			    xhr.onreadystatechange = function () {
-		//
-		// 			        if (xhr.readyState == 4 && xhr.status == 200) {
-		// 			  			callback(xhr.responseText);
-		// 			        }
-		// 					else
-		// 					{
-		// 					}
-		// 			    }
-		//
-		// 			    xhr.send();
-		// 			}
-		//
-		// 			if(ti.value != item && index==(note_file_ls.length - 1))
-		// 			{
-		// 				callback("");
-		// 			}
-		//
-		// 		});
-		// 	}
-		// 	else
-		// 	{
-		// 		callback("");
-		// 	}
-		// }
-		
-				// di
-		    	  // error_output.inne
+
 		function note_save_handler()
 		{
 			let di = document.getElementById('di');
@@ -739,36 +907,8 @@
 				  // $("#error_op").fadeOut();
 		    }	
 	
-		   	// if(di.value == "")
-		   	// 		    {
-				full_path_to_write = NOTE_PATH+ti.value+".txt";
-		  	// }
-		  	// else
-		  	// {
-		  	// 	full_path_to_write = NOTE_PATH+di.value+'\/'+ti.value+".txt";
-		  	// }
-				
-			// let temp_text = ta.value;
-			// let new_file_contents = file_contents + '\n' + temp_text;
-			//
-			// dbox_create_file(full_path_to_write, new_file_contents, /*overwrite*/1, function(){
-			// 	sub_but.innerHTML = "Saved"
-			// 		      	sub_but.style.background = '#65b4fb';
-			// 		      	sub_but.style.opacity = 1;
-			// 	already_saved = 1;
-			//
-			// 	ta.value = "";
-			// 	background.loaded_file_name = ti.value;
-			// 	background.loaded_file_dir = di.value;
-			// 	show_ro_text_area(new_file_contents);
-			//
-			// 	$("#ro_text_area").highlight();
-			//
-			// 	background.note_change_occurred = 0;
-			// 	background.most_recent_text_area_contents = "";
-			// });
 
-			dbox_create_file(full_path_to_write, ta.value, /*overwrite*/1, function(ret){
+			dbox_create_file(construct_file_path(), ta.value, /*overwrite*/1, function(ret){
 				if(ret == 200)
 				{
 					alert("Success");
@@ -776,8 +916,29 @@
 				else
 				{
 					alert("Failed. Data not backed up.");
+					auth_failure_handle()
 				}
 			});
+		}
+		
+		function logout()
+		{
+			let lo = document.getElementById('log');
+			let pu = document.getElementById('push');
+			
+			dbox_revoke_key(function(ret){
+				if(ret == 200)
+				{
+					alert("Dropbox keys successfully revoked");
+				}
+
+				reload_site_as(THISURL)
+			});
+			
+			localStorage.removeItem("dbox_token");
+			dbox_key_value = '';
+			pu.style.display = "none";
+			lo.value = "Login to Dropbox";
 		}
 		
 		function log()
@@ -789,46 +950,107 @@
 			
 			if(lo.value == "Login to Dropbox")
 			{
-				window.location.href = AUTH_URL;
+				reload_site_as(AUTH_URL)
 			}
 			else
 			{
-				let pu = document.getElementById('push');
-				
-				dbox_revoke_key(function(ret){
-					if(ret == 200)
-					{
-						alert("Logout success");
-						window.location.href = THISURL;
-					}
-					else
-					{
-						alert("Logout failed");
-						window.location.href = THISURL;
-					}
-				});
-				
-				localStorage.removeItem("dbox_token");
-				dbox_key_value = '';
-				pu.style.display = "none";
-				lo.value = "Login to Dropbox";
+				logout();
 			}
 		}
+		
+		function inject_timestamp()
+		{
+			// let ta = document.getElementById('ta');
+			if(ta.value)
+			{
+				ta.value = ta.value + '\n' +'[' + Date.now() + ']'
+			}
+			else
+			{
+				ta.value = '[' + Date.now() + ']'
+			}
+		}
+		
+		function mv()
+		{
+			var temp_name, old_name = open_file;
+			let ti = document.getElementById('ti');
+			let lo = document.getElementById('log');
+			
+			temp_name = prompt("Enter new name");
+			
+			if(temp_name == null)
+			{
+				return;
+			}
+			
+			while(temp_name == '')
+			{
+				temp_name = prompt("Enter new name (type something!)");
+				
+				if(temp_name == null)
+				{
+					return;
+				}
+			}
+							
+		    temp_name = temp_name.replace(/–/g, '-');
+
+		    if(temp_name.includes('\\') || temp_name.includes('\/'))
+		    {
+				temp_name = prompt("Please remove slashes from name", temp_name);
+		    }
+				
+			ti.value = temp_name
+			open_file = temp_name
+			save_loop();
+			clear_file_cache(old_name)
+			
+			if(lo.value != "Login")
+			{
+				//TODO kick off rename with dropbox		
+			}
+			
+			reload_site_as(THISURL+"?open="+open_file);
+		}
+		
 		var ta = TextAreaLineNumbersWithCanvas();
 	</script>
 		
-	<inline>
+	<!-- <inline> -->
     <!-- <button onclick="pull()">Pull Before</button>
 	<button onclick="pull()">Pull After</button> -->
 	<input id="push" type="button" onclick="note_save_handler()" value="Push">
-	<input id="erase" type="button" onclick="erase()" value="Erase">
-	<input id="log" type="button" onclick="log()" value="Login to Dropbox">
-	<input type="text" class="form-control"  id="ti" list="user_folders" placeholder="Untitled" value="">
+	<input id="ts" type="button" onclick="inject_timestamp()" value="Timestamp">
+	
+	<input id="new" type="button" onclick="open_new_file()" value="New File">
+	
+	<br>
+	<input id="mv" type="button" onclick="mv()" value="Rename">
+	<input type="text" class="form-control"  id="ti" list="user_folders" placeholder="Untitled" value="" disabled>
+	
 	<input type="text" class="form-control"  id="di" list="user_folders" placeholder="Folder (optional)" value="" style="display:none;">
-	<span id="lia">Logged in as: </span id="un"></span>
+	<br>
+	<input id="log" type="button" onclick="log()" value="Login to Dropbox">
+	<span id="lia" style="display:none;">Logged in as: </span><span id="un" style="color:white;"></span>
+	
+	<br>
+	<input id="ch" type="checkbox" name="ch" checked>
+	<label for="ch"> Reopen after closing</label>
+	
+	<br>
+	<input id="ch" type="checkbox" name="ch">
+	<label for="ch"> Alert Dropbox of changes</label>
+	
+	<br><br>
+	<label for="erase"> Debug tools:</label>
+	<br>
+	<input id="erase" type="button" onclick="erase()" value="Start Clean">
+	<input id="refresh" type="button" onclick="reload_site_as(THISURL)" value="Reload">
+	
 	<!-- <div id="error_op" style="display:none;"></div> -->
 	<div id="error_op"></div>
-	</inline>
+	<!-- </inline> -->
 </body>
 
 </html>
