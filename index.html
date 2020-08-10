@@ -363,7 +363,15 @@
 		function open_new_site_as(url)
 		{
 		    var win = window.open(url, '_blank');
-		    win.focus();
+			
+			if(win == null)
+			{
+				alert("We noticed popups are disabled. Please enable them to open all available files.");
+			}
+			else
+			{
+		    	win.focus();
+			}
 		}
 		
 		//TODO try to reauth without disturbing user
