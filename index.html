@@ -254,6 +254,7 @@
 			}
 		}
 		
+		//TODO harden this with small array as backup
 		function get_rand_word(callback)
 		{
   			fetch('https://random-word-api.herokuapp.com/word?number=1')
@@ -1123,7 +1124,7 @@
 			let ti = document.getElementById('ti');
 			let lo = document.getElementById('log');
 			
-			if(lo.value == "Login")
+			if(lo.value != "Logout")
 			{
 				//TODO make it so that this warning is not necessary. Just rename the file the next time they login. Possible to do in  a stable way?
 				if(!confirm("Changing the name while not logged into Dropbox may result in duplicate files under both names"))
@@ -1164,25 +1165,39 @@
 				return;
 			}
 						
-			if(lo.value != "Login")
+			if(lo.value == "Logout")
 			{
-				//TODO kick off rename with dropbox
-				dbox_mv_file(construct_file_path(temp_name), construct_file_path(ti.value), function(ret)
-				{
-					if(ret == 200)
+				save_loop(function(re){
+					
+					if(re == 200)
 					{
-						clear_file_cache(ti.value)
-						ti.value = temp_name
-						open_file = temp_name
-						save_loop();
-						reload_site_as(THISURL+"?open="+open_file);
+						//TODO kick off rename with dropbox
+						dbox_mv_file(construct_file_path(temp_name), construct_file_path(ti.value), function(ret)
+						{
+							if(ret == 200)
+							{
+								clear_file_cache(ti.value)
+								ti.value = temp_name
+								open_file = temp_name
+								save_loop();
+								reload_site_as(THISURL+"?open="+open_file);
+							}
+							else
+							{
+								alert("Failed to rename remote file, continuing with old name");
+							}
+						});	
 					}
-					else
-					{
-						alert("Failed to rename remote file, continuing with old name");
-					}
+					
 				});
-
+			}
+			else
+			{
+				clear_file_cache(ti.value)
+				ti.value = temp_name
+				open_file = temp_name
+				save_loop();
+				reload_site_as(THISURL+"?open="+open_file);	
 			}
 			
 			
