@@ -254,7 +254,7 @@
 		
 		function open_new_file()
 		{
-			open_new_site_as(THISURL+"?open=.Untitled_"+makeid(9));
+			open_new_site_as(THISURL+"?open=_Untitled_"+makeid(9));
 		}
 		
 		//TODO this currently warns the user that their data is about to be deleted, then STILL deletes it after they opt to preserve
@@ -366,7 +366,7 @@
 			
 			if(win == null)
 			{
-				show_oa();
+				show_oa(); //TODO this does not work because it is only hit when we are about to reload the tab. We need to send this as arg to new tab :/
 				alert("We noticed popups are disabled. Please enable them to open all available files.");
 				win = window.open(url, '_blank');
 				if(win!=null)
@@ -535,7 +535,7 @@
 					}
 					else
 					{
-						reload_site_as(THISURL+"?open=.Untitled_"+makeid(9));
+						reload_site_as(THISURL+"?open=_Untitled_"+makeid(9));
 					}
 				}
 			}
@@ -705,6 +705,24 @@
 						callback(null);
 						
 					}
+		        }
+		    }
+
+		    xhr.send();
+		}
+		
+		function dbox_mv_file(to, from, callback)
+		{
+		    var xhr = new XMLHttpRequest();
+		    xhr.open('POST', 'https://api.dropboxapi.com/2/files/move_v2', true);
+		    xhr.setRequestHeader('Authorization', 'Bearer ' + dbox_key_value);
+		    xhr.setRequestHeader('Dropbox-API-Arg', JSON.stringify({"from_path":from, "to_path":to, "autorename":false, "allow_shared_folder":false, "allow_ownership_transfer":false}));
+
+		    xhr.onreadystatechange = function ()
+			{
+		        if (xhr.readyState == 4)
+				{
+					callback(xhr.responseText)
 		        }
 		    }
 
@@ -1030,6 +1048,15 @@
 			let ti = document.getElementById('ti');
 			let lo = document.getElementById('log');
 			
+			if(lo.value == "Login")
+			{
+				//TODO make it so that this warning is not necessary. Just rename the file the next time they login. Possible to do in  a stable way?
+				if(!confirm("Changing the name while not logged into Dropbox may result in duplicate files under both names"))
+				{
+					return;
+				}
+			}
+			
 			temp_name = prompt("Enter new name");
 			
 			if(temp_name == null)
@@ -1053,18 +1080,37 @@
 		    {
 				temp_name = prompt("Please remove slashes from name", temp_name);
 		    }
-				
-			ti.value = temp_name
-			open_file = temp_name
-			save_loop();
-			clear_file_cache(old_name)
+			
+			temp_name = check_file_name(temp_name);
+			
+			if(temp_name == null)
+			{
+				console.log("Failed name check, aborting");
+				return;
+			}
 			
 			if(lo.value != "Login")
 			{
-				//TODO kick off rename with dropbox		
+				//TODO kick off rename with dropbox
+				dbox_mv_file(temp_name, ti.value, function()
+				{
+					if(ret == 200)
+					{
+						ti.value = temp_name
+						open_file = temp_name
+						save_loop();
+						clear_file_cache(old_name)
+						reload_site_as(THISURL+"?open="+open_file);
+					}
+					else
+					{
+						alert("Failed to rename remote file, continuing with old name");
+					}
+				});
+
 			}
 			
-			reload_site_as(THISURL+"?open="+open_file);
+			
 		}
 		
 		var ta = TextAreaLineNumbersWithCanvas();
