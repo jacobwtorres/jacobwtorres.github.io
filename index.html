@@ -739,6 +739,7 @@
 		    xhr.open('POST', 'https://api.dropboxapi.com/2/files/move_v2', true);
 		    xhr.setRequestHeader('Authorization', 'Bearer ' + dbox_key_value);
 		    // xhr.setRequestHeader('Dropbox-API-Arg', JSON.stringify({"from_path":from, "to_path":to, "autorename":false, "allow_shared_folder":false, "allow_ownership_transfer":false}));
+		    xhr.setRequestHeader('Content-type', 'application/json');
 
 		    xhr.onreadystatechange = function ()
 			{
