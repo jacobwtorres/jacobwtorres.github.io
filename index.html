@@ -1156,10 +1156,10 @@
 				{
 					if(ret == 200)
 					{
+						clear_file_cache(ti.value)
 						ti.value = temp_name
 						open_file = temp_name
 						save_loop();
-						clear_file_cache(old_name)
 						reload_site_as(THISURL+"?open="+open_file);
 					}
 					else
