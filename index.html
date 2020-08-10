@@ -254,9 +254,18 @@
 			}
 		}
 		
+		function get_rand_word(callback)
+		{
+  			fetch('https://random-word-api.herokuapp.com/word?number=1')
+  			  .then(response => response.json())
+  			  .then(data => callback(data[0]));
+		}
+		
 		function open_new_file()
 		{
-			open_new_site_as(THISURL+"?open=Untitled_"+makeid(9));
+			get_rand_word(function(word){
+				open_new_site_as(THISURL+"?open="+word+"_"+makeid(3));
+			})			
 		}
 		
 		//TODO this currently warns the user that their data is about to be deleted, then STILL deletes it after they opt to preserve
@@ -549,7 +558,12 @@
 					}
 					else
 					{
-						reload_site_as(THISURL+"?open=Untitled_"+makeid(9));
+						
+						get_rand_word(function(word){
+							reload_site_as(THISURL+"?open="+word+"_"+makeid(3));
+						})			
+			  			return
+						  
 					}
 				}
 			}
@@ -1149,9 +1163,7 @@
 				console.log("Failed name check, aborting");
 				return;
 			}
-			
-			//https://random-word-api.herokuapp.com/word?number=1
-			
+						
 			if(lo.value != "Login")
 			{
 				//TODO kick off rename with dropbox
