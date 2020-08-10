@@ -622,17 +622,25 @@
 			}
 		}
 		
-		function construct_file_path()
+		function construct_file_path(file)
 		{
+			if(file)
+			{
+				return NOTE_PATH + file + ".txt";
+			}
+			else
+			{
+				return NOTE_PATH + ti.value + ".txt";
+			}
+			
 		   	// if(di.value == "")
 		   	// 		    {
-				full_path_to_write = NOTE_PATH+ti.value+".txt";
+				// full_path_to_write = NOTE_PATH+ti.value+".txt";
 		  	// }
 		  	// else
 		  	// {
 		  	// 	full_path_to_write = NOTE_PATH+di.value+'\/'+ti.value+".txt";
 		  	// }
-			return full_path_to_write
 		}
 		
 		function login()
@@ -1111,7 +1119,7 @@
 			if(lo.value != "Login")
 			{
 				//TODO kick off rename with dropbox
-				dbox_mv_file(temp_name, ti.value, function(ret)
+				dbox_mv_file(construct_file_path(temp_name), construct_file_path(ti.value), function(ret)
 				{
 					if(ret == 200)
 					{
@@ -1157,9 +1165,9 @@
 	<input id="ch" type="checkbox" name="ch" checked>
 	<label for="ch"> Reopen after closing</label>
 	
-	<br>
+	<!-- <br>
 	<input id="alert" type="checkbox">
-	<label for="alert"> Alert Dropbox of changes</label>
+	<label for="alert"> Alert Dropbox of changes</label> -->
 	
 	<br>
 	<input id="tab" type="checkbox" checked>
