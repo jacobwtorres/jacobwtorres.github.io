@@ -48,6 +48,7 @@ textarea::-webkit-scrollbar-thumb
     position:fixed;
     text-align:center;
     top:0;
+    left:0;
     width:100%;
     z-index:10000;
 }
@@ -57,17 +58,13 @@ textarea::-webkit-scrollbar-thumb
     vertical-align:middle;
 }
 .hover_bkgr_fricc > div {
-    background-color: #fff;
-    box-shadow: 10px 10px 60px #555;
     display: inline-block;
-    height: auto;
+    /* height: auto; */
     max-width: 551px;
     min-height: 100px;
     vertical-align: middle;
-    width: 60%;
+    /* width: 60%; */
     position: relative;
-    border-radius: 8px;
-    padding: 15px 5%;
 }
 .popupCloseButton {
     background-color: #fff;
@@ -95,6 +92,9 @@ textarea::-webkit-scrollbar-thumb
     margin: 20px;
     display: inline-block;
     font-weight: bold;
+}
+.realFakeImg {
+    max-width: 100%;
 }
 
 circle {
