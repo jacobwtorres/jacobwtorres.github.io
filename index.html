@@ -7,18 +7,17 @@
 <body onload="init()" style="overflow:hidden;" bgcolor="#333">	
 	<!-- Load Main Script -->
 	<!-- This allows init() to be called, which initializes the application's state -->
-	<script type="text/javascript" src="./scripts/main.js"></script>
 
 	<!-- Create the editor interface -->
 	<script type="text/javascript" src="./scripts/create-editor.js"></script>
+    <script type="text/javascript" src="./scripts/main.js"></script>
+
 
 	<!-- <inline> -->
     <!-- <button onclick="pull()">Pull Before</button>
 	<button onclick="pull()">Pull After</button> -->
-	<div class="controls">
-		<div class="circle">Push</div>
-	</div>
 
+	<input id="rfb" type="button" onclick="rfb()" value="Real Fake Button">
 	<input id="push" type="button" onclick="note_save_handler()" value="Push">
 	<input id="oa" type="button" onclick="open_all_cached_files()" value="Open All Cached Files" style="display:none;">
 	<input id="ts" type="button" onclick="inject_timestamp()" value="Timestamp">
@@ -55,7 +54,15 @@
 	<br>
 	<input id="erase" type="button" onclick="erase()" value="Start Clean">
 	<input id="refresh" type="button" onclick="reload_site_as(THISURL)" value="Reload">
-	
+
+    <div id="open_pop" class="hover_bkgr_fricc">
+        <span class="helper"></span>
+        <div>
+            <img src="img/rfb.jpg" alt="Come on down to Real Fake Doors">
+            <div onclick="close_pop()" class="popupCloseButton">&times;</div>
+        </div>
+    </div>
+
 	<!-- <div id="error_op" style="display:none;"></div> -->
 	<div id="error_op"></div>
 	<!-- </inline> -->

@@ -142,7 +142,25 @@ function makeid(length) {
  
  //button to share. Sharing should be live-ish. Live-enough. But MUST not require the peer to have a dropbo acct. Must be able to get them the content they need without annoying steps
  //
- 
+
+function close_pop()
+{
+    let pop = document.getElementById('open_pop');
+
+    pop.style.display = "none";
+    pop.style.visibility = 'hidden';
+}
+
+function rfb()
+{
+    let pop = document.getElementById('open_pop');
+
+    //TODO make the contents of the popup dynamic so that we dont' need to keep rewriting the same code
+
+    pop.style.display = "inline";
+    pop.style.visibility = 'visible';
+}
+
  function clear_file_cache(file)
  {
      remove_from_list(file);
@@ -907,5 +925,3 @@ function makeid(length) {
      
      
  }
- 
- var ta = TextAreaLineNumbersWithCanvas();
