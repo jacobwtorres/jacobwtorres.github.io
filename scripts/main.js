@@ -39,6 +39,8 @@ var file_list = [];
 
 var user_warned = false;
 
+let ta = document.getElementById('ta');
+
 function makeid(length) {
     var result           = '';
     var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -142,6 +144,13 @@ function makeid(length) {
  
  //button to share. Sharing should be live-ish. Live-enough. But MUST not require the peer to have a dropbo acct. Must be able to get them the content they need without annoying steps
  //
+ //New plan APR 2021
+ //Remove junk features: renaming, timestamps,
+ //Add overwrite capability and visua diff if file being written is different than the one we loaded
+ //Focus on stable baseline functionality, file locking, merge resolution, encyption
+ //Allow custom color change of background
+ //Scrap current text box
+ //scrap multitab requirement. Allow multiple files to be opened in one page
 
 function close_pop()
 {
@@ -544,7 +553,7 @@ function rfb()
          {						
              if(does_list_exist())
              {
-                 open_all_tabs(true)
+                 //open_all_tabs(true)
              }
              else
              {
