@@ -41,6 +41,13 @@ var user_warned = false;
 
 let ta = document.getElementById('ta');
 
+var minutesLabel = document.getElementById("minutes");
+var secondsLabel = document.getElementById("seconds");
+var totalSeconds = 0;
+
+var savedLabel = document.getElementById("saved");
+var cachedLabel = document.getElementById("cached");
+
 function makeid(length) {
     var result           = '';
     var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -315,7 +322,23 @@ function rfb()
  function save_looop()
  {
      console.log("keypress save")
-     save_loop();
+     save_loop("kill", function(ret)
+     {
+         if(ret == 200)
+         {
+            resetTime();
+            minutesLabel.style.display = "inline";
+            secondsLabel.style.display = "inline";
+            savedLabel.style.display = "inline";
+         }
+         else if(ret == 671) //made up code indicating local cache
+         {
+            resetTime();
+            cachedLabel.style.display = "inline";
+            minutesLabel.style.display = "inline";
+            secondsLabel.style.display = "inline";
+         }
+     });
  }
  function keypress_timer_kick()
  {
@@ -340,7 +363,7 @@ function rfb()
          
          if(callback)
          {
-             callback(200);
+             callback(0);
          }
          return;
      }			
@@ -365,15 +388,22 @@ function rfb()
              }
          });
      }
+     else
+     {
+         if(callback)
+         {
+            callback(671);
+         }
+     }
      
      clearTimeout(timer);
      
      //because this loop reset user_warned var, it cannot rerun by accident during the close process a second time. We already run it once.
      //Timer will automatically restart on next text change
-     if(cmd != "kill")
-     {
-         timer = setTimeout(save_loop, timeout);
-     }
+     //if(cmd != "kill")
+     //{
+     //    timer = setTimeout(save_loop, timeout);
+     //}
  }
  
  //TODO this triggers closing handlers, ensure that we are never using this in a conflicting way
@@ -934,3 +964,65 @@ function rfb()
      
      
  }
+
+ta.onkeypress = function (ev)
+{
+    keypress_timer_kick();
+
+    minutesLabel.style.display = "none";
+    secondsLabel.style.display = "none";
+    savedLabel.style.display = "none";
+    cachedLabel.style.display = "none";
+};
+
+ta.onkeydown = function (e) {
+    if (e.keyCode === 9) { // tab was pressed
+        // get caret position/selection
+        var val = this.value,
+            start = this.selectionStart,
+            end = this.selectionEnd;
+
+        // set textarea value to: text before caret + tab + text after caret
+        ta.value = val.substring(0, start) + "    " + val.substring(end);
+
+        // put caret at right position again
+        this.selectionStart = this.selectionEnd = start + 4;
+
+        // prevent the focus lose
+        return false;
+    }
+};
+
+setInterval(setTime, 1000);
+
+function resetTime()
+{
+  totalSeconds = 0;
+  secondsLabel.innerHTML = pad(totalSeconds % 60);
+  minutesLabel.innerHTML = pad(parseInt(totalSeconds / 60)) + ":";
+}
+
+function setTime()
+{
+
+  if(totalSeconds > 3600)
+  {
+    minutesLabel.style.display = "none";
+    secondsLabel.style.display = "none";
+    return;
+  }
+
+  ++totalSeconds;
+
+  secondsLabel.innerHTML = pad(totalSeconds % 60);
+  minutesLabel.innerHTML = pad(parseInt(totalSeconds / 60)) + ":";
+}
+
+function pad(val) {
+  var valString = val + "";
+  if (valString.length < 2) {
+    return "0" + valString;
+  } else {
+    return valString;
+  }
+}
