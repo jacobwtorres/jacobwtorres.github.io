@@ -42,20 +42,21 @@
 
 
 
-	<input id="push" type="button" onclick="note_save_handler()" value="Push">
+	<input id="push" type="button" onclick="note_save_handler()" value="Push" style="display:none;">
 	<input id="oa" type="button" onclick="open_all_cached_files()" value="Open All Cached Files" style="display:none;">
 	
 	<input id="new" type="button" onclick="open_new_file()" value="New File" style="display:none;">
 	
 	<input id="mv" type="button" onclick="mv()" value="Rename">
 	<input type="text" class="form-control"  id="ti" list="user_folders" placeholder="Untitled" value="" disabled>
-	
+
+    <input id="ts" type="button" onclick="inject_timestamp()" value="Timestamp">
+    <input id="rfb" type="button" onclick="rfb()" value="Real Fake Button">
+
 	<input type="text" class="form-control"  id="di" list="user_folders" placeholder="Folder (optional)" value="" style="display:none;">
 	<input id="log" type="button" onclick="log()" value="Login to Dropbox">
 	<span id="lia" style="display:none;">Logged in as: </span><span id="un" style="color:white;"></span>
 
-	<input id="ts" type="button" onclick="inject_timestamp()" value="Timestamp">
-    <input id="rfb" type="button" onclick="rfb()" value="Real Fake Button">
 
 	<input id="ch" type="checkbox" name="ch" checked style="display:none;">
 	<label for="ch" style="display:none;"> Reopen after closing</label>

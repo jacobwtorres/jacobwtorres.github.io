@@ -666,8 +666,8 @@ function rfb()
      un.style.display = "inline";
      un.style.visibility = 'visible';
                  
-     pu.style.display = "inline";
-     pu.style.visibility = 'visible';
+     //pu.style.display = "inline";
+     //pu.style.visibility = 'visible';
      lo.value = "Logout";
      
      cache = localStorage.getItem(open_file)
