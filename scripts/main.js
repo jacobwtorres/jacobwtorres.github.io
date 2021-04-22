@@ -48,6 +48,8 @@ var totalSeconds = 0;
 var savedLabel = document.getElementById("saved");
 var cachedLabel = document.getElementById("cached");
 
+var file_contents_at_pull = "";
+
 function makeid(length) {
     var result           = '';
     var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -702,7 +704,7 @@ function rfb()
      
      cache = localStorage.getItem(open_file)
      cache_time = localStorage.getItem(open_file + ".ts")
-     
+ 
      dbox_cat_file(construct_file_path(), function(contents)
      {
          if(contents == null)
@@ -712,6 +714,7 @@ function rfb()
          else
          {
              ta.value = contents;
+             file_contents_at_pull = contents;
          }
      })
      
@@ -792,30 +795,41 @@ function rfb()
      {
            error_output.innerHTML = "";
            // $("#error_op").fadeOut();
-     }	
+     }
 
+     dbox_cat_file(construct_file_path(), function(contents)
+     {
+         if(file_contents_at_pull == contents)
+         {
+             dbox_create_file(construct_file_path(), ta.value, /*overwrite*/1, function(ret)
+             {
+                 if(callback)
+                 {
+                     callback(ret);
+                 }
 
-     dbox_create_file(construct_file_path(), ta.value, /*overwrite*/1, function(ret){
-         
-         if(callback)
-         {
-             callback(ret);
-         }
-         
-         if(ret == 200)
-         {
-             // alert("Success");
-             console.log("Remote backup SUCCESS")
+                 if(ret == 200)
+                 {
+                     // alert("Success");
+                     console.log("Remote backup SUCCESS")
+                     file_contents_at_pull = ta.value;
+                 }
+                 else
+                 {
+                     console.log("Remote backup FAIL")
+                     // alert("Remote backup failed");
+                     auth_failure_handle()
+                 }
+             });
          }
          else
          {
-             console.log("Remote backup FAIL")
-             // alert("Remote backup failed");
-             auth_failure_handle()
+             alert("File has changed on Dropbox.com since you last saved. Merge required.");
          }
-     });
+
+     })
  }
- 
+
  function logout()
  {
      let lo = document.getElementById('log');
@@ -1002,6 +1016,11 @@ function resetTime()
   minutesLabel.innerHTML = pad(parseInt(totalSeconds / 60)) + ":";
 }
 
+function killTime()
+{
+  totalSeconds = 3602;
+}
+
 function setTime()
 {
 
@@ -1026,3 +1045,23 @@ function pad(val) {
     return valString;
   }
 }
+
+document.addEventListener("visibilitychange", event => {
+  if (document.visibilityState == "visible") {
+  } else {
+    killTime();
+    console.log('User left page');
+  }
+})
+
+var last = (new Date()).getTime();
+
+setInterval(function(){
+	var current = (new Date()).getTime();
+	if (current-last > 3000) {
+        killTime();
+		console.log('power was suspended');
+	}
+	last = current;
+
+}, 1000);
