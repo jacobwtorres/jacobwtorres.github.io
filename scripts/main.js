@@ -710,6 +710,7 @@ function rfb()
          if(contents == null)
          {
              ta.value = cache;
+             file_contents_at_pull = null;
          }
          else
          {
