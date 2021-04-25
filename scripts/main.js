@@ -801,7 +801,8 @@ function rfb()
      {
          if(file_contents_at_pull == contents)
          {
-             dbox_create_file(construct_file_path(), ta.value, /*overwrite*/1, function(ret)
+             temp_ta_val = ta.value;
+             dbox_create_file(construct_file_path(), temp_ta_val, /*overwrite*/1, function(ret)
              {
                  if(callback)
                  {
@@ -812,7 +813,7 @@ function rfb()
                  {
                      // alert("Success");
                      console.log("Remote backup SUCCESS")
-                     file_contents_at_pull = ta.value;
+                     file_contents_at_pull = temp_ta_val;
                  }
                  else
                  {
