@@ -40,6 +40,10 @@ var file_list = [];
 var user_warned = false;
 
 let ta = document.getElementById('ta');
+let ta2 = document.getElementById('ta2');
+
+let kr = document.getElementById('kright');
+let kl = document.getElementById('rleft');
 
 var minutesLabel = document.getElementById("minutes");
 var secondsLabel = document.getElementById("seconds");
@@ -59,7 +63,11 @@ function makeid(length) {
     }
     return result;
  }
- 
+
+var sessionid = makeid(32);
+var remote_mode = 0;
+var pagelocked = false;
+
  //add ability to share file with other user in realtime. Is this possible w/o dropbox?
  
  //every files cache needs metadata about whether we have already prompted the uer
@@ -272,12 +280,23 @@ function rfb()
          open_new_site_as(THISURL+"?open="+word+"_"+makeid(3));
      })			
  }
- 
+
+close()
+{
+  if (confirm("Close Window?"))
+  {
+    close();
+  }
+};
+
+
  //TODO this currently warns the user that their data is about to be deleted, then STILL deletes it after they opt to preserve
- window.onbeforeunload = function(e) {
+/*
+window.onbeforeunload = function(e) {
      let lo = document.getElementById('log');
-     
+     alert("HERE"); 
      save_loop("kill");
+     localStorage.setItem(open_file + ".lock", null);
      
      if(open_file != '' && open_file != null) //this should never occur for user, but in test cases we hit it
      {
@@ -289,7 +308,7 @@ function rfb()
              ret = add_to_list(open_file);
  
              //TODO don't just checked that they are logged in, but that the file has actually saved as well
-             if((ch.checked == false /*&& lo.value != "Logout"*/) || ret == -1 )
+             if((ch.checked == false ) || ret == -1 )
              {
                  user_warned = true;
                  return "HERE"
@@ -304,11 +323,14 @@ function rfb()
      
      return;
  };
- 
+ /*
  //This function determines what happened in onbeforeunload, ensuring user was warned before removing file from local cache
  window.onunload = function(e) {
      let lo = document.getElementById('log');
-                 
+    
+
+     localStorage.setItem(open_file + ".lock", null);
+
      if(open_file != '' && open_file != null) //this should never occur for user, but in test cases we hit it
      {
          if(ta.value != '' && ta.value != null)//normal case of accidentally opening and immediately closing new tab
@@ -327,7 +349,7 @@ function rfb()
      }
      return;
  };
- 
+*/ 
  function save_looop()
  {
      console.log("keypress save")
@@ -339,6 +361,7 @@ function rfb()
             minutesLabel.style.display = "inline";
             secondsLabel.style.display = "inline";
             savedLabel.style.display = "inline";
+            localStorage.setItem(open_file + ".pending", 0);
          }
          else if(ret == 671) //made up code indicating local cache
          {
@@ -346,12 +369,14 @@ function rfb()
             cachedLabel.style.display = "inline";
             minutesLabel.style.display = "inline";
             secondsLabel.style.display = "inline";
+            localStorage.setItem(open_file + ".pending", 0);
          }
      });
  }
  function keypress_timer_kick()
  {
      console.log("kick")
+     localStorage.setItem(open_file + ".pending", 1);
      clearTimeout(keypress_timer);
      keypress_timer = setTimeout(save_looop, keypress_timeout /*ms*/);
  }
@@ -377,6 +402,9 @@ function rfb()
          return;
      }			
      
+
+     lock_file_loc();
+
      console.log("Cache now!!!");
      
      localStorage.setItem(open_file, ta.value);
@@ -523,38 +551,43 @@ function rfb()
      // remove_from_list('2')
      // console.log("Full list loaded=" + file_list)
      // return
-             
+
      let di = document.getElementById('di');
      let ti = document.getElementById('ti');
      let lo = document.getElementById('log');
-     
+
      let ch = document.getElementById('ch');
-                 
+
      var queryString = new URL(window.location.href.replace(/#/g,"?"));
      console.log("queryString= " + queryString);
- 
+
+     console.log("sessionid=" + sessionid);
+
      if(queryString != "")
      {
          console.log("Checking for token");
          // window.location.href = AUTH_URL;
          access_token = queryString.searchParams.get("access_token");
          console.log("Found New token: " + access_token);
-         
+
          account_id = queryString.searchParams.get("account_id");
          console.log("Found New Account ID: " + account_id);
-         
+
          open_file = queryString.searchParams.get("open");
          console.log("Found Open file: " + open_file);
 
+         merge_file = queryString.searchParams.get("merge");
+         console.log("Found Merge file: " + open_file);
+
          //THIS SECTION IS ONLY HIT DURING ACTIVE LOGIN, NOT FOR LOGGED IN STATUS
          if(access_token != null && account_id != null)
-         {			
+         {
              dbox_key_value = access_token;
              dbox_account_id = account_id;
-             
+
              localStorage.setItem("dbox_token", dbox_key_value);
              localStorage.setItem("dbox_account_id", dbox_account_id);
-             
+
              dbox_key_check(function(ret){
                  if(ret == 200)
                  {
@@ -569,7 +602,7 @@ function rfb()
                      localStorage.removeItem("dbox_account_id");
                      reload_site_as(THISURL);
                  }
-             
+
              })
 
              return;
@@ -582,39 +615,50 @@ function rfb()
                  open_file = null;
                  reload_site_as(THISURL);
              }
-             
+
              ti.value = nn;
              open_file = nn;
              remove_from_list(open_file)
              console.log("HERE!!!!!!!!!:"+file_list)
          }
+         else if(merge_file != null)
+         {
+             nn = check_file_name(merge_file);
+             if(nn == null)
+             {
+                 reload_site_as(THISURL);
+             }
+
+             ti.value = nn;
+             merge_file = nn;
+             alert("You are now at the pretend merge page");
+         }
          else
-         {						
+         {
              if(does_list_exist())
              {
                  //open_all_tabs(true)
              }
              else
              {
-                 
+
                  get_rand_word(function(word){
                      reload_site_as(THISURL+"?open="+word+"_"+makeid(3));
-                 })			
-                   return
-                   
+                 })
+
+                 return
+
              }
          }
      }
-     
-     
+
      console.log("Token=")
      console.log(localStorage.getItem("dbox_token"))
-     
+
      // let hard_coded_login = true;
      // let h_dbox_key_value = '';
      // let h_dbox_account_id = '';
- 
-     
+
      //load in dbx credentials
      if ((localStorage.getItem("dbox_token") == '' || localStorage.getItem("dbox_token") == null) && !hard_coded_login)
      {
@@ -663,7 +707,39 @@ function rfb()
      
      let lo = document.getElementById('log');
      lo.value = 'Login to Dropbox';
-     
+
+     //var pending_cnt = 0;
+     //while(1 == localStorage.getItem(open_file + ".pending") && pending_cnt < 15)
+     //{
+     //    sleep(1);
+     //    pending_cnt++;
+     //}
+     console.log("In load func...");
+     var timer;
+     var flocked = document.getElementById('filelocked');
+     if(1 == localStorage.getItem(open_file + ".pending"))
+     {
+         ta.value = "Document has pending changes...please wait";
+         timer = setTimeout(function(){ load_wo_login(); }, 3000);
+
+         ta.readOnly = "true";
+         pagelocked = true;
+         minutesLabel.style.display = "none";
+         secondsLabel.style.display = "none";
+         savedLabel.style.display = "none";
+         cachedLabel.style.display = "none";
+         flocked.style.display = "inline";
+         flocked.style.visibility = 'visible';
+         return;
+     }
+     steal_lock();
+     ta.removeAttribute('readonly');
+     flocked.style.display = "none";
+     flocked.style.visibility = 'hidden';
+     pagelocked = false;
+     localStorage.setItem(open_file + ".pending", 0);
+
+
      if(localStorage.getItem(open_file) != null)
      {
          console.log("Found local cache of "+open_file)
@@ -691,7 +767,53 @@ function rfb()
        // 	full_path_to_write = NOTE_PATH+di.value+'\/'+ti.value+".txt";
        // }
  }
- 
+
+function steal_lock()
+{
+    console.log("Stealing lock");
+    localStorage.setItem(open_file + ".lock", sessionid);
+    //ta.readOnly = "false";
+    ta.removeAttribute('readonly');
+}
+
+//old name, this should really be "check lock" to see if another tab has opened
+function lock_file_loc()
+{
+    if(is_file_locked_loc())
+    {
+        ta.readOnly = "true";
+        pagelocked = true;
+        let flocked = document.getElementById('filelocked');
+        flocked.style.display = "inline";
+        minutesLabel.style.display = "none";
+        secondsLabel.style.display = "none";
+        savedLabel.style.display = "none";
+        cachedLabel.style.display = "none";
+        flocked.style.visibility = 'visible';
+        alert("This file can only be edited once you steal the lock on it. Refresh to have option to steal the lock. *NOTE* Your last keypress or paste operation was not cached or saved remotely.");
+        return -1;
+    }
+    else
+    {
+        //localStorage.setItem(open_file + ".lock", sessionid);
+        //ta.removeAttribute('readonly');
+        //ta.readOnly = "false";
+    }
+    return 200;
+}
+
+function is_file_locked_loc()
+{
+     lockid = localStorage.getItem(open_file + ".lock");
+
+     if(lockid != null && lockid != sessionid)
+     {
+         return true;
+     }
+
+     //return false;
+}
+
  function login()
  {
        let li = document.getElementById('lia');
@@ -708,7 +830,31 @@ function rfb()
      //pu.style.display = "inline";
      //pu.style.visibility = 'visible';
      lo.value = "Logout";
-     
+ 
+     var timer;
+     var flocked = document.getElementById('filelocked');
+     if(1 == localStorage.getItem(open_file + ".pending"))
+     {
+         ta.value = "Document has pending changes...please wait";
+         timer = setTimeout(function(){ login(); }, 3000);
+
+         ta.readOnly = "true";
+         pagelocked = true;
+         minutesLabel.style.display = "none";
+         secondsLabel.style.display = "none";
+         savedLabel.style.display = "none";
+         cachedLabel.style.display = "none";
+         flocked.style.display = "inline";
+         flocked.style.visibility = 'visible';
+         return;
+     }
+     steal_lock();
+     ta.removeAttribute('readonly');
+     flocked.style.display = "none";
+     flocked.style.visibility = 'hidden';
+     pagelocked = false;
+     localStorage.setItem(open_file + ".pending", 0);
+
      cache = localStorage.getItem(open_file)
      cache_time = localStorage.getItem(open_file + ".ts")
  
@@ -988,14 +1134,43 @@ function rfb()
      
  }
 
+function tachanged()
+{
+    let clickedwhilelocked = 0;
+
+    //prevent triggering of warning once we've gone read only
+    if(!pagelocked)
+    {
+        if(lock_file_loc() == 200)
+        {
+            keypress_timer_kick();
+
+            minutesLabel.style.display = "none";
+            secondsLabel.style.display = "none";
+            savedLabel.style.display = "none";
+            cachedLabel.style.display = "none";
+        }
+    }
+    else
+    {
+        clickedwhilelocked++;
+    }
+
+    if(clickedwhilelocked > 5)
+    {
+        alert("You must refresh if you want to steal the lock and edit this file.");
+        clickedwhilelocked = 0;
+    }
+}
+
+ta.onpaste = function (ev)
+{
+    tachanged();
+};
+
 ta.onkeypress = function (ev)
 {
-    keypress_timer_kick();
-
-    minutesLabel.style.display = "none";
-    secondsLabel.style.display = "none";
-    savedLabel.style.display = "none";
-    cachedLabel.style.display = "none";
+    tachanged();
 };
 
 ta.onkeydown = function (e) {
@@ -1010,6 +1185,8 @@ ta.onkeydown = function (e) {
 
         // put caret at right position again
         this.selectionStart = this.selectionEnd = start + 4;
+
+        tachanged();
 
         // prevent the focus lose
         return false;

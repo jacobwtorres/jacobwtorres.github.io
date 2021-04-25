@@ -41,6 +41,8 @@
 
 
 
+	<input id="kleft" type="button" onclick="keep_left_handler()" value="Keep Left" style="display:none;">
+	<input id="kright" type="button" onclick="keep_left_handler()" value="Keep Right" style="display:none;">
 
 	<input id="push" type="button" onclick="note_save_handler()" value="Push" style="display:none;">
 	<input id="oa" type="button" onclick="open_all_cached_files()" value="Open All Cached Files" style="display:none;">
@@ -54,13 +56,14 @@
     <input id="rfb" type="button" onclick="rfb()" value="Real Fake Button">
 
 	<input type="text" class="form-control"  id="di" list="user_folders" placeholder="Folder (optional)" value="" style="display:none;">
-	<input id="log" type="button" onclick="log()" value="Login to Dropbox">
+	<input id="log" type="button" onclick="log()"  style="background:blue;color:white;" value="Login to Dropbox">
 	<span id="lia" style="display:none;"><b>Logged in as: </b></span><span id="un" style="color:white;"></span>
 
     <span id="saved" style="display:none;color:green">  &#10004 Saved </span>
     <span id="cached" style="display:none;color:yellow">  &#10004 Cached </span>
     <label id="minutes" style="display:none;color:white;">00</label><label id="seconds" style="display:none; color:white;">00</label>
 
+    <span id="filelocked" style="display:none;color:red">  LOCKED </span>
 
 	<input id="ch" type="checkbox" name="ch" checked style="display:none;">
 	<label for="ch" style="display:none;"> Reopen after closing</label>
@@ -79,8 +82,9 @@
 	<input id="refresh" type="button" onclick="reload_site_as(THISURL)" value="Reload">
 
     -->
-
+    <br>
     <textarea id="ta" cols="30" rows="5"></textarea>
+    <textarea id="ta2" cols="30" rows="5" style="display:none;width:49%;"></textarea>
     <script type="text/javascript" src="./scripts/main.js"></script>
     <div id="open_pop" class="hover_bkgr_fricc">
         <span class="helper"></span>
