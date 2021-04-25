@@ -160,7 +160,14 @@ function makeid(length) {
  //Allow custom color change of background
  //Scrap current text box
  //scrap multitab requirement. Allow multiple files to be opened in one page
-
+ //
+ //File locks will be applied locally, not remotely. Only to block local cache from getting stepped on.
+ //Remote conflicts will only be dealt with by a merge page that on resolves cache-remote conflicts. Not merging ta.val
+ //The file_contents_at_pull need to be cached as well in order to make sure we don't overwrite the cache with an old remote file
+ //i.e. if the last time we cached we couldn't talk to the server, we need to know about that even if tab gets closed.
+ //
+ //page should automatically direct to browse page if files exist in local list since they cannot be browsed on dropbox.com
+ //
 function close_pop()
 {
     let pop = document.getElementById('open_pop');
