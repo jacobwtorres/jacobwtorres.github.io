@@ -911,11 +911,13 @@ function is_file_locked_loc()
          cache = localStorage.getItem(open_file)
          last_pull = localStorage.getItem(open_file + ".pull")
          cache_time = localStorage.getItem(open_file + ".ts")
-     
+    
+         console.log("cache ="+cache)
+
          dbox_cat_file(construct_file_path(), function(contents)
          {
              //nothing has remotely since last sync with server. Use cache in case it contains offline changes.
-             if(contents == last_pull && cache != null)
+             if(contents == last_pull && cache != null && cache != "null")
              {
                  console.log("Loading file from cache. (contents == last_pull && cache != null)")
                  ta.value = cache;
@@ -927,7 +929,7 @@ function is_file_locked_loc()
                  ta.value = cache;
              }
              //if our latest pull is not inline with what the server says, then we need a way of knowing whether to use cache or 
-             else if(contents != last_pull && cache != null)
+             else if(contents != last_pull && cache != null && cache != "null")
              {
                 //merge conflict as long as we always delete the cache after successful remote backup
                 alert("File has changed on Dropbox.com since you last saved (or you created a new file while offline of the same name as an existing remote file). Merge required.");
