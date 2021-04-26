@@ -1003,22 +1003,22 @@ function is_file_locked_loc()
          dbox_cat_file(construct_file_path(merge_file), function(contents)
          {
              ta.value = contents;
+             ta2.value = localStorage.getItem(merge_file);
+
+             if(ta.value == ta2.value || ta2.value  == "null")
+             {
+                 alert("No merge conflict identified.");
+                 reload_site_as(THISURL+"?open="+merge_file);
+             }
+             else
+             {
+                 merge_active = true;
+                 localStorage.setItem(merge_file + ".pending", 1);
+                 cache_at_merge_start = ta2.value;
+                 remote_at_merge_start = ta.value;
+             }
          });
 
-         ta2.value = localStorage.getItem(merge_file);
-
-         if(ta.value == ta2.value || ta2.value  == "null")
-         {
-             alert("No merge conflict identified.");
-             reload_site_as(THISURL+"?open="+merge_file);
-         }
-         else
-         {
-             merge_active = true;
-             localStorage.setItem(merge_file + ".pending", 1);
-             cache_at_merge_start = ta2.value;
-             remote_at_merge_start = ta.value;
-         }
      }
      
      //TODO why can't I create a dir...?
