@@ -916,6 +916,27 @@ function is_file_locked_loc()
 
          dbox_cat_file(construct_file_path(), function(contents)
          {
+             if(cache == "null")
+             {
+                 ta.value = contents;
+                 localStorage.setItem(open_file + ".pull", contents);
+                 console.log("Loading file from remote")
+             }
+             else
+             {
+                 if(contents == last_pull)
+                 {
+                     ta.value = cache;
+                     console.log("Loading file from cache")
+                 }
+                 else
+                 {
+
+                    alert("File has changed on Dropbox.com since you last saved (or you created a new file while offline of the same name as an existing remote file). Merge required.");
+                    reload_site_as(THISURL+"?merge="+open_file);
+                 }
+             }
+/*
              //nothing has remotely since last sync with server. Use cache in case it contains offline changes.
              if(contents == last_pull && cache != null && cache != "null")
              {
@@ -947,6 +968,7 @@ function is_file_locked_loc()
              {
                  alert("Shouldn't reach here");
              }
+             */
          })
      }
      else if(merge_file != null)
