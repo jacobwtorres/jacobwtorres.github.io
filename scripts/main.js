@@ -950,7 +950,7 @@ function is_file_locked_loc()
              ta.value = contents;
          });
 
-         ta2.value = localStorage.getItem(open_file);
+         ta2.value = localStorage.getItem(merge_file);
 
          if(ta.value == ta2.value || ta2.value  == null)
          {
@@ -995,8 +995,8 @@ function is_file_locked_loc()
          {
              // alert("Success");
              console.log("Remote backup SUCCESS")
-             localStorage.setItem(open_file + ".pull", mergetxt);
-             localStorage.setItem(open_file, null);
+             localStorage.setItem(merge_file + ".pull", mergetxt);
+             localStorage.setItem(merge_file, null);
              reload_site_as(THISURL + "?open=" + merge_file);
          }
          else
