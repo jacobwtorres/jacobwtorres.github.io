@@ -985,6 +985,7 @@ function is_file_locked_loc()
              alert("No merge conflict identified.");
              reload_site_as(THISURL+"?open="+merge_file);
          }
+         localStorage.setItem(merge_file + ".pending", 1);
      }
      
      //TODO why can't I create a dir...?
@@ -1025,6 +1026,7 @@ function is_file_locked_loc()
              console.log("Remote backup SUCCESS")
              localStorage.setItem(merge_file + ".pull", mergetxt);
              localStorage.setItem(merge_file, null);
+             localStorage.setItem(merge_file + ".pending", 0);
              reload_site_as(THISURL + "?open=" + merge_file);
          }
          else
