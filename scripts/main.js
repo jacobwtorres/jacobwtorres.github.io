@@ -1138,11 +1138,6 @@ function is_file_locked_loc()
              temp_ta_val = ta.value;
              dbox_create_file(construct_file_path(), temp_ta_val, /*overwrite*/1, function(ret)
              {
-                 if(callback)
-                 {
-                     callback(ret);
-                 }
-
                  if(ret == 200)
                  {
                      // alert("Success");
@@ -1152,6 +1147,10 @@ function is_file_locked_loc()
                  else
                  {
                      console.log("Remote backup FAIL")
+                     if(callback)
+                     {
+                         callback(671);
+                     }
                      // alert("Remote backup failed");
                      auth_failure_handle()
                  }
@@ -1162,6 +1161,13 @@ function is_file_locked_loc()
              alert("File has changed on Dropbox.com since you last saved (or you created a new file while offline of the same name as an existing remote file). Merge required.");
 
              reload_site_as(THISURL+"?merge="+open_file);
+         }
+         else
+         {
+             if(callback)
+             {
+                 callback(671)
+             }
          }
 
      })
