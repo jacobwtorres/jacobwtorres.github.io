@@ -53,6 +53,9 @@ var totalSeconds = 0;
 var savedLabel = document.getElementById("saved");
 var cachedLabel = document.getElementById("cached");
 
+let timestamp = document.getElementById('ts');
+let rename = document.getElementById('mv');
+
 var file_contents_at_pull = "";
 
 function makeid(length) {
@@ -176,7 +179,26 @@ var pagelocked = false;
  //i.e. if the last time we cached we couldn't talk to the server, we need to know about that even if tab gets closed.
  //
  //page should automatically direct to browse page if files exist in local list since they cannot be browsed on dropbox.com
- //
+ //edge case: possible to enter two merges at the same time. A merge should detect that their were other changes and warn the user
+ //    problem is that we can't block the user from doing this without risking locking up a specific file permanently
+ //Unknown bug: hitting LOCKED MERGED ACTIVE after refreshing refreshing a merge page when another merge has occured
+ //changes pending not getting wiped properly
+var font_size = 15;
+function font_size_up()
+{
+    font_size++;
+    ta.style.fontSize = font_size.toString() + "px"
+    ta2.style.fontSize = font_size.toString() + "px"
+}
+
+function font_size_down()
+{
+    font_size--;
+    ta.style.fontSize = font_size.toString() + "px"
+    ta2.style.fontSize = font_size.toString() + "px"
+}
+
+
 function close_pop()
 {
     let pop = document.getElementById('open_pop');
@@ -626,6 +648,8 @@ window.onbeforeunload = function(e) {
 
              ti.value = nn;
              merge_file = nn;
+             rename.style.display = "none";
+             timestamp.style.display = "none";
              merge.style.display = "inline";
              ta2.style.display = "inline";
              kl.style.display = "inline";
@@ -985,7 +1009,10 @@ function is_file_locked_loc()
              alert("No merge conflict identified.");
              reload_site_as(THISURL+"?open="+merge_file);
          }
-         localStorage.setItem(merge_file + ".pending", 1);
+         else
+         {
+             localStorage.setItem(merge_file + ".pending", 1);
+         }
      }
      
      //TODO why can't I create a dir...?
