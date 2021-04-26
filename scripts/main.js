@@ -980,7 +980,7 @@ function is_file_locked_loc()
 
          ta2.value = localStorage.getItem(merge_file);
 
-         if(ta.value == ta2.value || ta2.value  == null)
+         if(ta.value == ta2.value || ta2.value  == "null")
          {
              alert("No merge conflict identified.");
              reload_site_as(THISURL+"?open="+merge_file);
