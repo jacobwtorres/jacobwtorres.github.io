@@ -186,6 +186,9 @@ var remote_at_merge_start = "";
  //    problem is that we can't block the user from doing this without risking locking up a specific file permanently
  //Unknown bug: hitting LOCKED MERGED ACTIVE after refreshing refreshing a merge page when another merge has occured
  //changes pending not getting wiped properly
+ //handle situation where we want to load file while logged out that we had previously been editing while logged in.
+     //this could be internet dropout without page reload as well. Just warn user that this could lead to merge conflict
+
 var font_size = 15;
 function font_size_up()
 {
@@ -943,7 +946,7 @@ function is_file_locked_loc()
 
          dbox_cat_file(construct_file_path(), function(contents)
          {
-             if(cache == "null")
+             if(cache == "null" || contents == cache)
              {
                  ta.value = contents;
                  localStorage.setItem(open_file + ".pull", contents);
