@@ -917,11 +917,13 @@ function is_file_locked_loc()
              //nothing has remotely since last sync with server. Use cache in case it contains offline changes.
              if(contents == last_pull && cache != null)
              {
+                 console.log("Loading file from cache. (contents == last_pull && cache != null)")
                  ta.value = cache;
              }
              //if we have never pulled this and server says null, call it null locally and load cache in case it exists
              else if(contents == null && last_pull == null)
              {
+                 console.log("Loading file from cache. (contents == null && last_pull == null)")
                  ta.value = cache;
              }
              //if our latest pull is not inline with what the server says, then we need a way of knowing whether to use cache or 
@@ -932,8 +934,10 @@ function is_file_locked_loc()
 
                 reload_site_as(THISURL+"?merge="+open_file);
              }
+             //some other client updated the file, but we are fine loading it since we have no cache to be in conflict with
              else if(contents != last_pull && cache == null)
              {
+                 console.log("Loading file from remote")
                  ta.value = contents;
                  localStorage.setItem(open_file + ".pull", contents);
              }
