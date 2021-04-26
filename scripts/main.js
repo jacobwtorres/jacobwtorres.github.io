@@ -909,29 +909,30 @@ function is_file_locked_loc()
      {
 
          cache = localStorage.getItem(open_file)
+         last_pull = localStorage.getItem(open_file + ".pull")
          cache_time = localStorage.getItem(open_file + ".ts")
      
          dbox_cat_file(construct_file_path(), function(contents)
          {
              //nothing has remotely since last sync with server. Use cache in case it contains offline changes.
-             if(contents == localStorage.getItem(open_file + ".pull") && cache != null)
+             if(contents == last_pull && cache != null)
              {
                  ta.value = cache;
              }
              //if we have never pulled this and server says null, call it null locally and load cache in case it exists
-             else if(contents == null && localStorage.getItem(open_file + ".pull") == null)
+             else if(contents == null && last_pull == null)
              {
                  ta.value = cache;
              }
              //if our latest pull is not inline with what the server says, then we need a way of knowing whether to use cache or 
-             else if(contents != localStorage.getItem(open_file + ".pull") && cache != null)
+             else if(contents != last_pull && cache != null)
              {
                 //merge conflict as long as we always delete the cache after successful remote backup
                 alert("File has changed on Dropbox.com since you last saved (or you created a new file while offline of the same name as an existing remote file). Merge required.");
 
                 reload_site_as(THISURL+"?merge="+open_file);
              }
-             else if(contents != localStorage.getItem(open_file + ".pull") && cache == null)
+             else if(contents != last_pull && cache == null)
              {
                  ta.value = contents;
                  localStorage.setItem(open_file + ".pull", contents);
@@ -995,7 +996,7 @@ function is_file_locked_loc()
              // alert("Success");
              console.log("Remote backup SUCCESS")
              localStorage.setItem(open_file + ".pull", mergetxt);
-             localStorage.setItem(open_file, mergetxt);
+             localStorage.setItem(open_file, null);
              reload_site_as(THISURL + "?open=" + merge_file);
          }
          else
