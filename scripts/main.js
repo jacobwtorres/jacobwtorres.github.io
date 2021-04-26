@@ -71,6 +71,7 @@ function makeid(length) {
 var sessionid = makeid(32);
 var remote_mode = 0;
 var pagelocked = false;
+var merge_active = false;
 
  //add ability to share file with other user in realtime. Is this possible w/o dropbox?
  
@@ -1011,6 +1012,7 @@ function is_file_locked_loc()
          }
          else
          {
+             merge_active = true;
              localStorage.setItem(merge_file + ".pending", 1);
          }
      }
@@ -1319,7 +1321,7 @@ function tachanged()
     let clickedwhilelocked = 0;
 
     //prevent triggering of warning once we've gone read only
-    if(!pagelocked)
+    if(!pagelocked && !merge_active)
     {
         if(lock_file_loc() == 200)
         {
