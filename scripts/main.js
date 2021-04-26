@@ -937,7 +937,7 @@ function is_file_locked_loc()
                 reload_site_as(THISURL+"?merge="+open_file);
              }
              //some other client updated the file, but we are fine loading it since we have no cache to be in conflict with
-             else if(contents != last_pull && cache == null)
+             else if(contents != last_pull && cache == "null")
              {
                  console.log("Loading file from remote")
                  ta.value = contents;
