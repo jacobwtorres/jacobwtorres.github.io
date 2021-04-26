@@ -952,7 +952,7 @@ function is_file_locked_loc()
 
          ta2.value = localStorage.getItem(open_file);
 
-         if(contents == localStorage.getItem(open_file) || localStorage.getItem(open_file) == null)
+         if(ta.value == ta2.value || ta2.value  == null)
          {
              alert("No merge conflict identified.");
              reload_site_as(THISURL+"?open="+merge_file);
