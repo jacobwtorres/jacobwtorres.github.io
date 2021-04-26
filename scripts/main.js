@@ -1157,7 +1157,7 @@ function is_file_locked_loc()
                  }
              });
          }
-         else
+         else if(localStorage.getItem(open_file + ".pull") != contents && contents != null)
          {
              alert("File has changed on Dropbox.com since you last saved (or you created a new file while offline of the same name as an existing remote file). Merge required.");
 
