@@ -41,8 +41,8 @@
 
 
 
-	<input id="kleft" type="button" onclick="keep_left_handler()" value="Keep Left" style="display:none;">
-	<input id="kright" type="button" onclick="keep_left_handler()" value="Keep Right" style="display:none;">
+	<input id="kleft" type="button" onclick="merge_resolve(0)" value="Keep Left" style="display:none;">
+	<input id="kright" type="button" onclick="merge_resolve(1)" value="Keep Right" style="display:none;">
 
 	<input id="push" type="button" onclick="note_save_handler()" value="Push" style="display:none;">
 	<input id="oa" type="button" onclick="open_all_cached_files()" value="Open All Cached Files" style="display:none;">
@@ -64,6 +64,7 @@
     <label id="minutes" style="display:none;color:white;">00</label><label id="seconds" style="display:none; color:white;">00</label>
 
     <span id="filelocked" style="display:none;color:red">  LOCKED </span>
+    <span id="merge" style="display:none;color:red">  MERGE ACTIVE </span>
 
 	<input id="ch" type="checkbox" name="ch" checked style="display:none;">
 	<label for="ch" style="display:none;"> Reopen after closing</label>

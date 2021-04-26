@@ -43,7 +43,8 @@ let ta = document.getElementById('ta');
 let ta2 = document.getElementById('ta2');
 
 let kr = document.getElementById('kright');
-let kl = document.getElementById('rleft');
+let kl = document.getElementById('kleft');
+let merge = document.getElementById('merge');
 
 var minutesLabel = document.getElementById("minutes");
 var secondsLabel = document.getElementById("seconds");
@@ -281,14 +282,6 @@ function rfb()
      })			
  }
 
-close()
-{
-  if (confirm("Close Window?"))
-  {
-    close();
-  }
-};
-
 
  //TODO this currently warns the user that their data is about to be deleted, then STILL deletes it after they opt to preserve
 /*
@@ -362,6 +355,8 @@ window.onbeforeunload = function(e) {
             secondsLabel.style.display = "inline";
             savedLabel.style.display = "inline";
             localStorage.setItem(open_file + ".pending", 0);
+            localStorage.setItem(open_file, null); //erase cache if successful remote backup
+                //this is required for the logic of the merge conflict detection around line 910
          }
          else if(ret == 671) //made up code indicating local cache
          {
@@ -577,7 +572,7 @@ window.onbeforeunload = function(e) {
          console.log("Found Open file: " + open_file);
 
          merge_file = queryString.searchParams.get("merge");
-         console.log("Found Merge file: " + open_file);
+         console.log("Found Merge file: " + merge_file);
 
          //THIS SECTION IS ONLY HIT DURING ACTIVE LOGIN, NOT FOR LOGGED IN STATUS
          if(access_token != null && account_id != null)
@@ -631,7 +626,12 @@ window.onbeforeunload = function(e) {
 
              ti.value = nn;
              merge_file = nn;
-             alert("You are now at the pretend merge page");
+             merge.style.display = "inline";
+             ta2.style.display = "inline";
+             kl.style.display = "inline";
+             kr.style.display = "inline";
+             ta.style.width = "49%";
+             ta2.style.width = "49%";
          }
          else
          {
@@ -662,8 +662,16 @@ window.onbeforeunload = function(e) {
      //load in dbx credentials
      if ((localStorage.getItem("dbox_token") == '' || localStorage.getItem("dbox_token") == null) && !hard_coded_login)
      {
-         console.log("Key NOT found in storage");
-         load_wo_login();
+         if(merge_file != null)
+         {
+             alert("Cannot perform merge unless logged in");
+             reload_site_as(THISURL+"?open="+merge_file);
+         }
+         else
+         {
+             console.log("Key NOT found in storage");
+             load_wo_login();
+         }
      }
      else
      {
@@ -692,13 +700,22 @@ window.onbeforeunload = function(e) {
              else
              {
                  console.log("Key NOT working");
-                 load_wo_login();
+                 if(merge_file != null)
+                 {
+                     alert("Cannot perform merge unless logged in");
+                     reload_site_as(THISURL+"?open="+merge_file);
+                 }
+                 else
+                 {
+                     load_wo_login();
+                 }
              }
              
          })
      }
  }
  
+ var cnt = 0;
  function load_wo_login()
  {						
      let pu = document.getElementById('push');
@@ -719,6 +736,23 @@ window.onbeforeunload = function(e) {
      var flocked = document.getElementById('filelocked');
      if(1 == localStorage.getItem(open_file + ".pending"))
      {
+        if(cnt > 5)
+        {
+             if(confirm("This file was likely closed while a save was pending. Recent changes may have been lost. Would you like to forcefully remove the file lock to open now?"))
+             {
+                 localStorage.setItem(open_file + ".pending", 0);
+                 load_wo_login();
+                 return;
+             }
+             else
+             {
+                 cnt = 0;
+             }
+
+        }
+
+         cnt++;
+
          ta.value = "Document has pending changes...please wait";
          timer = setTimeout(function(){ load_wo_login(); }, 3000);
 
@@ -739,14 +773,13 @@ window.onbeforeunload = function(e) {
      pagelocked = false;
      localStorage.setItem(open_file + ".pending", 0);
 
-
      if(localStorage.getItem(open_file) != null)
      {
          console.log("Found local cache of "+open_file)
          ta.value = localStorage.getItem(open_file)
      }
  }
- 
+
  function construct_file_path(file)
  {
      if(file)
@@ -835,6 +868,23 @@ function is_file_locked_loc()
      var flocked = document.getElementById('filelocked');
      if(1 == localStorage.getItem(open_file + ".pending"))
      {
+        if(cnt > 5)
+        {
+             if(confirm("This file was likely closed while a save was pending. Recent changes may have been lost. Would you like to forcefully remove the file lock to open now?"))
+             {
+                 localStorage.setItem(open_file + ".pending", 0);
+                 login();
+                 return;
+             }
+             else
+             {
+                 cnt = 0;
+             }
+
+        }
+
+         cnt++;
+
          ta.value = "Document has pending changes...please wait";
          timer = setTimeout(function(){ login(); }, 3000);
 
@@ -855,22 +905,58 @@ function is_file_locked_loc()
      pagelocked = false;
      localStorage.setItem(open_file + ".pending", 0);
 
-     cache = localStorage.getItem(open_file)
-     cache_time = localStorage.getItem(open_file + ".ts")
- 
-     dbox_cat_file(construct_file_path(), function(contents)
+     if(open_file != null)
      {
-         if(contents == null)
+
+         cache = localStorage.getItem(open_file)
+         cache_time = localStorage.getItem(open_file + ".ts")
+     
+         dbox_cat_file(construct_file_path(), function(contents)
          {
-             ta.value = cache;
-             file_contents_at_pull = null;
-         }
-         else
+             //nothing has remotely since last sync with server. Use cache in case it contains offline changes.
+             if(contents == localStorage.getItem(open_file + ".pull") && cache != null)
+             {
+                 ta.value = cache;
+             }
+             //if we have never pulled this and server says null, call it null locally and load cache in case it exists
+             else if(contents == null && localStorage.getItem(open_file + ".pull") == null)
+             {
+                 ta.value = cache;
+             }
+             //if our latest pull is not inline with what the server says, then we need a way of knowing whether to use cache or 
+             else if(contents != localStorage.getItem(open_file + ".pull") && cache != null)
+             {
+                //merge conflict as long as we always delete the cache after successful remote backup
+                alert("File has changed on Dropbox.com since you last saved (or you created a new file while offline of the same name as an existing remote file). Merge required.");
+
+                reload_site_as(THISURL+"?merge="+open_file);
+             }
+             else if(contents != localStorage.getItem(open_file + ".pull") && cache == null)
+             {
+                 ta.value = contents;
+                 localStorage.setItem(open_file + ".pull", contents);
+             }
+             else
+             {
+                 alert("Shouldn't reach here");
+             }
+         })
+     }
+     else if(merge_file != null)
+     {
+         dbox_cat_file(construct_file_path(merge_file), function(contents)
          {
              ta.value = contents;
-             file_contents_at_pull = contents;
+         });
+
+         ta2.value = localStorage.getItem(open_file);
+
+         if(contents == localStorage.getItem(open_file) || localStorage.getItem(open_file) == null)
+         {
+             alert("No merge conflict identified.");
+             reload_site_as(THISURL+"?open="+merge_file);
          }
-     })
+     }
      
      //TODO why can't I create a dir...?
      // dbox_create_folder(NOTE_PATH);
@@ -887,6 +973,40 @@ function is_file_locked_loc()
      //if exists in neither, check if it exists in external dbox directory
      //if only exists in extern dbox, load it and mark the caches with metadata indicating when we branched from mainline (so that we can alert to overwriting saves)
      //if nothing found, just create it as a new file in remote cache and alert to any name conflicts upon saving
+ }
+
+ function merge_resolve(keep)
+ {
+     var mergetxt;
+
+     if(keep == 0 /*"left"*/)
+     {
+         mergetxt = ta.value;
+     }
+     else
+     {
+         mergetxt = ta2.value;
+     }
+
+     dbox_create_file(construct_file_path(merge_file), mergetxt, /*overwrite*/1, function(ret)
+     {
+         if(ret == 200)
+         {
+             // alert("Success");
+             console.log("Remote backup SUCCESS")
+             localStorage.setItem(open_file + ".pull", mergetxt);
+             localStorage.setItem(open_file, mergetxt);
+             reload_site_as(THISURL + "?open=" + merge_file);
+         }
+         else
+         {
+             alert("Unable to upload to Dropbox. Please do not close this window or you will lose your merge changes. Check your internet connection and try again.");
+             //TODO if its an auth failure here then the changes are going to get lost no matter what. Unless we reload credentials after user logs in in another tab OR we implement a merge caching operation. But that really starts to get confusing...
+             // alert("Remote backup failed");
+             //auth_failure_handle()
+         }
+     });
+
  }
 
  function note_save_handler(callback)
@@ -953,7 +1073,7 @@ function is_file_locked_loc()
 
      dbox_cat_file(construct_file_path(), function(contents)
      {
-         if(file_contents_at_pull == contents)
+         if(localStorage.getItem(open_file + ".pull") == contents)
          {
              temp_ta_val = ta.value;
              dbox_create_file(construct_file_path(), temp_ta_val, /*overwrite*/1, function(ret)
@@ -967,7 +1087,7 @@ function is_file_locked_loc()
                  {
                      // alert("Success");
                      console.log("Remote backup SUCCESS")
-                     file_contents_at_pull = temp_ta_val;
+                     localStorage.setItem(open_file + ".pull", temp_ta_val);
                  }
                  else
                  {
@@ -979,7 +1099,9 @@ function is_file_locked_loc()
          }
          else
          {
-             alert("File has changed on Dropbox.com since you last saved. Merge required.");
+             alert("File has changed on Dropbox.com since you last saved (or you created a new file while offline of the same name as an existing remote file). Merge required.");
+
+             reload_site_as(THISURL+"?merge="+open_file);
          }
 
      })
