@@ -72,6 +72,8 @@ var sessionid = makeid(32);
 var remote_mode = 0;
 var pagelocked = false;
 var merge_active = false;
+var cache_at_merge_start = "";
+var remote_at_merge_start = "";
 
  //add ability to share file with other user in realtime. Is this possible w/o dropbox?
  
@@ -1014,6 +1016,8 @@ function is_file_locked_loc()
          {
              merge_active = true;
              localStorage.setItem(merge_file + ".pending", 1);
+             cache_at_merge_start = ta2.value;
+             remote_at_merge_start = ta.value;
          }
      }
      
@@ -1047,24 +1051,43 @@ function is_file_locked_loc()
          mergetxt = ta2.value;
      }
 
-     dbox_create_file(construct_file_path(merge_file), mergetxt, /*overwrite*/1, function(ret)
+     if(cache_at_merge_start != localStorage.getItem(merge_file))
      {
-         if(ret == 200)
+         if(!confirm("It appears a separate merge was completed after opening this one. If you continue, this merge will overwrite the file. Whatever is in the selected text box will be kept regardless. Please press OK to continue."))
          {
-             // alert("Success");
-             console.log("Remote backup SUCCESS")
-             localStorage.setItem(merge_file + ".pull", mergetxt);
-             localStorage.setItem(merge_file, null);
-             localStorage.setItem(merge_file + ".pending", 0);
-             reload_site_as(THISURL + "?open=" + merge_file);
+             return;
          }
-         else
+     }
+
+     dbox_cat_file(construct_file_path(merge_file), function(contents)
+     {
+         if(remote_at_merge_start != contents)
          {
-             alert("Unable to upload to Dropbox. Please do not close this window or you will lose your merge changes. Check your internet connection and try again.");
-             //TODO if its an auth failure here then the changes are going to get lost no matter what. Unless we reload credentials after user logs in in another tab OR we implement a merge caching operation. But that really starts to get confusing...
-             // alert("Remote backup failed");
-             //auth_failure_handle()
+             if(!confirm("It appears the file was changed on Dropbox.com after starting this merge. If you continue, this merge will overwrite the file. Whatever is in the selected text box will be kept regardless. Please press OK to continue."))
+             {
+                 return;
+             }
          }
+
+         dbox_create_file(construct_file_path(merge_file), mergetxt, /*overwrite*/1, function(ret)
+         {
+             if(ret == 200)
+             {
+                 // alert("Success");
+                 console.log("Remote backup SUCCESS")
+                 localStorage.setItem(merge_file + ".pull", mergetxt);
+                 localStorage.setItem(merge_file, null);
+                 localStorage.setItem(merge_file + ".pending", 0);
+                 reload_site_as(THISURL + "?open=" + merge_file);
+             }
+             else
+             {
+                 alert("Unable to upload to Dropbox. Please do not close this window or you will lose your merge changes. Check your internet connection and try again.");
+                 //TODO if its an auth failure here then the changes are going to get lost no matter what. Unless we reload credentials after user logs in in another tab OR we implement a merge caching operation. But that really starts to get confusing...
+                 // alert("Remote backup failed");
+                 //auth_failure_handle()
+             }
+         });
      });
 
  }
@@ -1439,3 +1462,11 @@ setInterval(function(){
 	last = current;
 
 }, 1000);
+
+function prepareFrame() {
+    var ifrm = document.createElement("iframe");
+    ifrm.setAttribute("src", THISURL);
+    ifrm.style.width = "640px";
+    ifrm.style.height = "480px";
+    document.body.appendChild(ifrm);
+}
