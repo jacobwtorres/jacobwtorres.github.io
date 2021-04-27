@@ -1169,6 +1169,10 @@ function is_file_locked_loc()
                      // alert("Success");
                      console.log("Remote backup SUCCESS")
                      localStorage.setItem(open_file + ".pull", temp_ta_val);
+                     if(callback)
+                     {
+                         callback(200);
+                     }
                  }
                  else
                  {
@@ -1404,6 +1408,10 @@ ta.onkeydown = function (e) {
 
         // prevent the focus lose
         return false;
+    }
+    if( e.keyCode == 8 || e.keyCode == 46 )
+    {
+        tachanged();
     }
 };
 
