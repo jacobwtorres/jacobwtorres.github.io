@@ -188,6 +188,26 @@ var remote_at_merge_start = "";
  //changes pending not getting wiped properly
  //handle situation where we want to load file while logged out that we had previously been editing while logged in.
      //this could be internet dropout without page reload as well. Just warn user that this could lead to merge conflict
+ //update auth to latest
+ //add detection of user returning to page followed by a check of the remote and an alert to user if remote has changed
+      //BEFORE they start typing and introduce a merge conflict
+ //Should we store any settings persistently? Zoom level, cursor location?
+ //add browse dropdown. Need to be able to browse those that exist locally too.
+ //Need to tell the user to 
+ //When user clicks enter once, drop down and indent. When they press it twice make it a new paragraph without indent
+ //before we unload page, we should detect if we are offline first and load cache/lastpull instead of letting the page disappear
+ //what happens to a merge process that gets interrupted by internet down? We need to store the selected copy and put it in cache
+     //be sure to block the page reload here for sure
+ //fix the impending AUTH changes!!!
+ //add baically a front end REST API for a chrome ext to call! The ext will provide you access to all tabs so that we can implement
+     //queue to push and pop from with the side click functionality that actually makes sense (and add all tabs button)
+     //the extension will attract more users and not be much to maintain since all login will be handled
+     //can add quick note taking and book marking functionality as well. Highlight, side click, save quote
+     //can the ext access local storage? If not we have to add query param to check login status
+ //Name: Droplet.txt
+ //would dropbox allow me to revoke a users access through my tool? That would resolve the possibility of people stealing my code
+      //it would be an unreasonable amount of work for them to create their own keys. Unless they were planning on dispersing
+      //the code themselves. That would suck
 
 var font_size = 15;
 function font_size_up()
