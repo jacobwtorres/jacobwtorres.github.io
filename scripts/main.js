@@ -622,6 +622,9 @@ window.onbeforeunload = function(e) {
          merge_file = queryString.searchParams.get("merge");
          console.log("Found Merge file: " + merge_file);
 
+         var show_rlq = queryString.searchParams.get("show_rlq");
+         console.log("show_rlq=" + show_rlq);
+
          //THIS SECTION IS ONLY HIT DURING ACTIVE LOGIN, NOT FOR LOGGED IN STATUS
          if(access_token != null && account_id != null)
          {
@@ -682,6 +685,11 @@ window.onbeforeunload = function(e) {
              kr.style.display = "inline";
              ta.style.width = "49%";
              ta2.style.width = "49%";
+         }
+         else if(show_rlq != null && show_rlq == 1)
+         {
+             document.body.innerHTML = "Hello!";
+             return;
          }
          else
          {

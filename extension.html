@@ -7,8 +7,14 @@
     <a target="_blank" rel="noopener noreferrer" href="https://www.google.com">Link</a>
 
 	<input id="log" type="button" onclick="log()"  style="background:blue;color:white;" value="Login to Dropbox">
-	<span id="lia" style="display:none;"><b>Logged in as: </b></span><span id="un" style="color:white;"></span>
+	<span id="lia" style="display:none;"><b>Logged in as: </b></span><span id="un" style="color:black;"></span>
+	</span><span id="label" style="color:black;">Temp</span>
+    <script>
 
+         var queryString = new URL(window.location.href.replace(/#/g,"?"));
+         var param = queryString.searchParams.get("add_url_to_rlq");
+         document.getElementByID("label").innerHTML = url;
+    </script>
 </body>
 
 </html>
