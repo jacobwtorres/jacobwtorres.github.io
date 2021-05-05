@@ -21,7 +21,7 @@ var BMARK_PATH = "/Bookmarks/";
 var NOTE_PATH = "/Notes/";
 var INTERNAL_PATH = "/.internal/";
 
-var current_note_path = "";
+var current_note_path = NOTE_PATH;
 var already_saved = 0;
 var full_path_to_write = "";
 
