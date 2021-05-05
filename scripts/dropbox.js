@@ -151,3 +151,98 @@ function dbox_revoke_key(callback)
     
     xhr.send();
 }
+
+function dbox_ls_files(path, callback)
+{
+	var op_arr = [""];
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'https://api.dropboxapi.com/2/files/list_folder', true);
+    xhr.setRequestHeader('Authorization', 'Bearer ' + dbox_key_value);
+    xhr.setRequestHeader('Content-type', 'application/json');
+
+
+    xhr.onreadystatechange = function () {
+
+		// sample_output.innerHTML += "Trying to LS files";
+
+
+        if (xhr.readyState == 4 && xhr.status == 200) {
+      		  // sample_output.innerHTML =xhr.responseText;
+
+			  var obj = JSON.parse(xhr.responseText);
+
+			  //op_arr.push(obj.entries[1].name);
+
+			  for (var i = 0; i < obj.entries.length; i++) {
+				  // sample_output.innerHTML += obj.entries[i].name;
+
+				  if(obj.entries[i][".tag"] == "file")
+			  	  {
+					  let str = obj.entries[i].name.replace(/\.[^/.]+$/, "");
+			 		  op_arr.push(str);
+							//obj.entries[i];
+							//sample_output.innerHTML += obj.entries[i].name;
+
+				  }
+			  }
+
+				callback(op_arr);
+
+        }
+		else
+		{
+		  // sample_output.innerHTML += "Error trying to LS files";
+			//dbox_revoke_key();
+		}
+    }
+
+    var data = JSON.stringify({"path":path});
+
+    xhr.send(data);
+}
+
+function dbox_ls_dir(path, callback)
+{
+	var op_arr = [""];
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'https://api.dropboxapi.com/2/files/list_folder', true);
+    xhr.setRequestHeader('Authorization', 'Bearer ' + dbox_key_value);
+    xhr.setRequestHeader('Content-type', 'application/json');
+
+    xhr.onreadystatechange = function () {
+
+        if (xhr.readyState == 4 && xhr.status == 200) {
+      		  // sample_output.innerHTML =xhr.responseText;
+
+			  var obj = JSON.parse(xhr.responseText);
+
+			  //op_arr.push(obj.entries[1].name);
+
+			  for (var i = 0; i < obj.entries.length; i++) {
+				  //sample_output.innerHTML = obj.entries[i][".tag"];
+				  if(obj.entries[i][".tag"] == "folder")
+			  	  {
+			 				op_arr.push(obj.entries[i].name);
+							//obj.entries[i];
+							//sample_output.innerHTML += obj.entries[i].name;
+
+				  }
+				  else
+				  {
+					  break;
+				  }
+			  }
+
+				callback(op_arr);
+
+        }
+		else
+		{
+			//dbox_revoke_key();
+		}
+    }
+
+    var data = JSON.stringify({"path":path});
+
+    xhr.send(data);
+}

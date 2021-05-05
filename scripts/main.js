@@ -208,6 +208,9 @@ var remote_at_merge_start = "";
  //would dropbox allow me to revoke a users access through my tool? That would resolve the possibility of people stealing my code
       //it would be an unreasonable amount of work for them to create their own keys. Unless they were planning on dispersing
       //the code themselves. That would suck
+//upon opening, site should identify any files not backed up remotely and back them up even if it's not the one we opened.
+//add local encryption of dropbox keys? Like a quick pin basically?
+//for encyrption, store salt in file name? Or have a hidden folder with metadata (sounds like way more work)?
 
 var font_size = 15;
 function font_size_up()
@@ -905,6 +908,33 @@ function is_file_locked_loc()
      //return false;
 }
 
+function autocomplete(inp, arr) {
+
+	while (inp.list.hasChildNodes())
+	{
+		inp.list.removeChild(inp.list.firstChild);
+	}
+
+    if(arr != null)
+	{
+		arr.forEach(function (item, index) {
+		  var option = document.createElement('option');
+		  option.value = item;
+		  inp.list.appendChild(option); // user_folders_list_elem.
+		});
+	}
+}
+
+function util_dump_arr(arr)
+{
+    if(arr != null)
+	{
+		arr.forEach(function (item, index) {
+		  console.log(index + "=" + item);
+		});
+	}
+}
+
  function login()
  {
        let li = document.getElementById('lia');
@@ -962,6 +992,12 @@ function is_file_locked_loc()
      flocked.style.visibility = 'hidden';
      pagelocked = false;
      localStorage.setItem(open_file + ".pending", 0);
+
+     dbox_ls_files(current_note_path, function(arr){
+         //note_file_ls = arr;
+         //autocomplete(tab_title_elem, note_file_ls);
+         util_dump_arr(arr);
+     });
 
      if(open_file != null)
      {
