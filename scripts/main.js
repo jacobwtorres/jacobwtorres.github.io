@@ -58,6 +58,8 @@ let rename = document.getElementById('mv');
 
 var file_contents_at_pull = "";
 
+let tab_title_elem = document.getElementById('tab_title');
+
 function makeid(length) {
     var result           = '';
     var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -995,7 +997,7 @@ function util_dump_arr(arr)
 
      dbox_ls_files(current_note_path, function(arr){
          //note_file_ls = arr;
-         //autocomplete(tab_title_elem, note_file_ls);
+         autocomplete(tab_title_elem, arr);
          util_dump_arr(arr);
      });
 
