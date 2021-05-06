@@ -922,6 +922,7 @@ function autocomplete(inp, arr) {
 		arr.forEach(function (item, index) {
 		  var option = document.createElement('option');
 		  option.value = item;
+          if(index == 2)option.style.color = 'yellow';
 		  inp.list.appendChild(option); // user_folders_list_elem.
 		});
 	}
